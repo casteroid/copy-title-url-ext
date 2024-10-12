@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "Copy Title and URL",
+    "description": "Copy page title and URL to clipboard.",
+    "version": "1.0",
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "permissions": [
+        "activeTab",
+        "contextMenus",
+        "clipboardWrite"
+    ]
+}
