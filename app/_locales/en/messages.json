@@ -1,6 +1,6 @@
 {
   "appName": {
-    "message": "copy-title-url-ext",
+    "message": "Copy Title and URL",
     "description": "The name of the application"
   },
   "appShortName": {
@@ -13,6 +13,10 @@
   },
   "copyTitleUrlMenu": {
     "message": "Copy Title and URL",
+    "description": "The name of the context menu item"
+  },
+  "copySelectionUrlMenu": {
+    "message": "Copy Selection and URL",
     "description": "The name of the context menu item"
   }
 }

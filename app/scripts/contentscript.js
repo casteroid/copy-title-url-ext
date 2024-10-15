@@ -1,10 +1,22 @@
-import { CopyMessage } from "./models";
 import browser from "./browser";
+import { copySelection, copyTitle } from "./ext";
+import { Operation } from "./models";
 
-const copyToClipboard = async data => await navigator.clipboard.writeText(data);
+const handleOperation = (op, data) => {
+    const { title, url } = data;
+    switch (op) {
+        case Operation.TITLE:
+            copyTitle(title, url);
+            break;
+        case Operation.SELECTION:
+            copySelection(url);
+            break;
+        default:
+            // do nothing
+    }
+}
 
 browser.runtime.onMessage.addListener(request => {
-    const { message } = request;
-    const text = new CopyMessage(message.url, message.title).build();
-    copyToClipboard(text);
+    const { op, data } = request;
+    handleOperation(op, data);
 });
