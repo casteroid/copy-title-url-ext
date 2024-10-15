@@ -1,0 +1,12 @@
+{
+  "name": "copy-title-url-ext",
+  "version": "0.0.1",
+  "description": "An extension to copy the title and URL of the current page.",
+  "scripts": {
+    "dev": "webextension-toolbox dev",
+    "build": "webextension-toolbox build"
+  },
+  "devDependencies": {
+    "@webextension-toolbox/webextension-toolbox": "^7.1.1"
+  }
+}

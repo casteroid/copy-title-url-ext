@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "copy-title-url-ext",
+    "description": "The name of the application"
+  },
+  "appShortName": {
+    "message": "cp-title-url",
+    "description": "The short_name (maximum of 12 characters recommended) is a short version of the app's name."
+  },
+  "appDescription": {
+    "message": "An extension to copy the title and URL of the current page.",
+    "description": "The description of the application"
+  },
+  "copyTitleUrlMenu": {
+    "message": "Copy Title and URL",
+    "description": "The name of the context menu item"
+  }
+}
