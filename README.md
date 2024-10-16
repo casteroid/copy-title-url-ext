@@ -1,10 +1,10 @@
-# copy-title-url-ext
+# Copy Title and URL - Extension
 
-An extension to copy the title and URL of the current page.
+A browser extension to copy the title/selection and URL of the current page.
 
 ## Install
 
-	$ npm install
+	npm install
 
 ## Development
 
@@ -27,3 +27,7 @@ The build tool also defines a variable named `process.env.NODE_ENV` in your scri
 ## Docs
 
 * [webextension-toolbox](https://github.com/HaNdTriX/webextension-toolbox)
+
+## Credits
+
+Website icons created by [Freepik - Flaticon](https://www.flaticon.com/free-icons/website).
