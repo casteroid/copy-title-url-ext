@@ -2,11 +2,18 @@
   "name": "copy-title-url-ext",
   "version": "0.0.1",
   "description": "An extension to copy the title and URL of the current page.",
+  "type": "module",
   "scripts": {
     "dev": "webextension-toolbox dev",
-    "build": "webextension-toolbox build"
+    "build": "webextension-toolbox build",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "devDependencies": {
-    "@webextension-toolbox/webextension-toolbox": "^7.1.1"
+    "@webextension-toolbox/webextension-toolbox": "^7.1.1",
+    "jest": "^29.7.0",
+    "puppeteer": "^23.5.3"
+  },
+  "jest": {
+    "transform": {}
   }
 }
