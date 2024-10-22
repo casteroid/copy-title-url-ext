@@ -30,6 +30,8 @@ const handleCopyRequest = (info, tab) => {
   browser.tabs.sendMessage(tab.id, toPayload(info, tab));
 }
 
+browser.contextMenus.onClicked.addListener(handleCopyRequest);
+
 browser.runtime.onInstalled.addListener(() => {
   Object.keys(Menus).forEach(key => {
     const id = Menus[key].ID;
@@ -37,5 +39,4 @@ browser.runtime.onInstalled.addListener(() => {
     const contexts = Menus[key].CONTEXTS;
     browser.contextMenus.create({ id, title, contexts });
   });
-  browser.contextMenus.onClicked.addListener(handleCopyRequest)
 });
