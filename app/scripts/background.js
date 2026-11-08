@@ -14,20 +14,19 @@ const Menus = {
   }
 };
 
-const toPayload = (info, tab) => {
-  const { url, title } = tab;
+const toPayload = info => {
   switch (info.menuItemId) {
 
     case Menus.CopyTitle.ID:
-      return { op: Operation.TITLE, data: { title, url } };
+      return { op: Operation.TITLE };
 
     case Menus.CopySelection.ID:
-      return { op: Operation.SELECTION, data: { url } };
+      return { op: Operation.SELECTION };
   }
 };
 
 const handleCopyRequest = (info, tab) => {
-  browser.tabs.sendMessage(tab.id, toPayload(info, tab));
+  browser.tabs.sendMessage(tab.id, toPayload(info));
 }
 
 browser.contextMenus.onClicked.addListener(handleCopyRequest);
