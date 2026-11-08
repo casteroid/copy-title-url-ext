@@ -31,8 +31,8 @@ Firefox:
 ## Architecture
 
 ```
-app/scripts/background.js     background script: creates the context-menu items, sends the clicked one to the tab
-app/scripts/contentscript.js  content script: receives { op, data } from the background script and copies
+app/scripts/background.js     background script: creates the context-menu items, tells the tab which one was clicked
+app/scripts/contentscript.js  content script: receives { op } and copies the page title or selection with location.href
 app/scripts/ext.js            copyTitle and copySelection, which write to the clipboard
 app/scripts/browser.js        the chrome or browser global, picked at build time by process.env.VENDOR
 app/scripts/models.js         Operation, the message types
