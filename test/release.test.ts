@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
+import manifest from "../app/manifest.json";
 import pkg from "../package.json";
 import {
   bumpFor,
   lintCommit,
   nextVersion,
+  type ParsedCommit,
   parseCommit,
   releaseNotes,
-  type ParsedCommit,
-} from "../scripts/release/conventional";
-import manifest from "../app/manifest.json";
+} from "../scripts/release/conventional.ts";
 
 const commit = (message: string, sha = "abcdef1234567890") => ({ sha, message });
 const parsed = (...messages: string[]) =>
@@ -78,7 +78,9 @@ describe("nextVersion", () => {
 
 describe("releaseNotes", () => {
   it("lists only user-visible changes, grouped", () => {
-    const notes = releaseNotes(parsed("feat(popup): tier filter", "fix: midnight rescan", "docs: readme", "feat!: new storage key"));
+    const notes = releaseNotes(
+      parsed("feat(popup): tier filter", "fix: midnight rescan", "docs: readme", "feat!: new storage key"),
+    );
     expect(notes).toBe(
       "### Breaking changes\n\n- new storage key (3000000)\n\n" +
         "### Features\n\n- **popup:** tier filter (0000000)\n\n" +

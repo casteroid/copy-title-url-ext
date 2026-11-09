@@ -1,7 +1,7 @@
 {
   "name": "copy-title-url-ext",
   "version": "0.0.3",
-  "description": "An extension to copy the title and URL of the current page.",
+  "description": "An extension to copy the title/selection and URL of the current page, adds a context menu on right-click.",
   "private": true,
   "engines": {
     "node": ">=22.18"
@@ -10,12 +10,15 @@
     "dev": "node scripts/build.mjs --watch",
     "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p app",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
     "test": "vitest run",
     "package": "rm -rf dist packages && npm run build chrome && npm run build firefox",
     "release:plan": "node scripts/release/plan.ts",
     "lint:commits": "node scripts/release/lint-commits.ts"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.6",
     "@types/chrome": "^0.3.7",
     "@types/node": "^22.20.5",
     "esbuild": "^0.28.2",

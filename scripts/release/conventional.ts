@@ -1,6 +1,18 @@
 /** Conventional Commits parsing and the semver bump they imply. https://www.conventionalcommits.org/ */
 
-export const COMMIT_TYPES = ["feat", "fix", "perf", "refactor", "docs", "test", "build", "ci", "chore", "style", "revert"] as const;
+export const COMMIT_TYPES = [
+  "feat",
+  "fix",
+  "perf",
+  "refactor",
+  "docs",
+  "test",
+  "build",
+  "ci",
+  "chore",
+  "style",
+  "revert",
+] as const;
 export type CommitType = (typeof COMMIT_TYPES)[number];
 export type Bump = "major" | "minor" | "patch";
 
@@ -15,14 +27,14 @@ const GIT_GENERATED = /^(Merge (branch|pull request|remote-tracking branch) |Rev
 export function parseCommit({ sha, message }: Commit): ParsedCommit | null {
   const [header = "", ...rest] = message.trim().split("\n");
   const m = HEADER.exec(header.trim());
-  const type = m?.groups?.type;
-  if (!m?.groups || !type || !(COMMIT_TYPES as readonly string[]).includes(type)) return null;
+  const { type, subject } = m?.groups ?? {};
+  if (!m?.groups || !type || !subject || !(COMMIT_TYPES as readonly string[]).includes(type)) return null;
   return {
     sha,
     type: type as CommitType,
     scope: m.groups.scope ?? null,
     breaking: m.groups.bang === "!" || BREAKING_FOOTER.test(rest.join("\n")),
-    subject: m.groups.subject!.trim(),
+    subject: subject.trim(),
   };
 }
 
@@ -64,7 +76,9 @@ const SECTIONS: { title: string; pick: (c: ParsedCommit) => boolean }[] = [
 export function releaseNotes(commits: ParsedCommit[]): string {
   const blocks: string[] = [];
   for (const { title, pick } of SECTIONS) {
-    const lines = commits.filter(pick).map((c) => `- ${c.scope ? `**${c.scope}:** ` : ""}${c.subject} (${c.sha.slice(0, 7)})`);
+    const lines = commits
+      .filter(pick)
+      .map((c) => `- ${c.scope ? `**${c.scope}:** ` : ""}${c.subject} (${c.sha.slice(0, 7)})`);
     if (lines.length > 0) blocks.push(`### ${title}\n\n${lines.join("\n")}`);
   }
   return blocks.length > 0 ? `${blocks.join("\n\n")}\n` : "Maintenance release.\n";

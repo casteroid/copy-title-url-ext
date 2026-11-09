@@ -35,7 +35,8 @@ console.log(`Upload: ${upload.uploadState}${upload.crxVersion ? ` (version ${upl
 
 let state = upload.uploadState;
 for (const started = Date.now(); state === "IN_PROGRESS" || state === "UPLOAD_IN_PROGRESS"; ) {
-  if (Date.now() - started > POLL_LIMIT_MS) fail("Upload still processing after 5 minutes; check the Developer Dashboard.");
+  if (Date.now() - started > POLL_LIMIT_MS)
+    fail("Upload still processing after 5 minutes; check the Developer Dashboard.");
   await new Promise((r) => setTimeout(r, POLL_MS));
   state = (await call<StatusResponse>("GET", `${API}/v2/${item}:fetchStatus`)).lastAsyncUploadState;
   console.log(`Upload: ${state}`);
@@ -54,7 +55,11 @@ const published = await call<PublishResponse>("POST", `${API}/v2/${item}:publish
 for (const w of published.warningInfo?.warnings ?? []) console.warn(`Warning ${w.reason}: ${w.description}`);
 console.log(`Submitted for review with ${publishType}; item state: ${published.state}`);
 
-async function call<T>(method: string, url: string, init: { body?: string | Uint8Array; contentType?: string } = {}): Promise<T> {
+async function call<T>(
+  method: string,
+  url: string,
+  init: { body?: string | Uint8Array; contentType?: string } = {},
+): Promise<T> {
   const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
   if (init.contentType) headers["Content-Type"] = init.contentType;
   const res = await fetch(url, { method, headers, body: init.body });

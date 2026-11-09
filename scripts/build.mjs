@@ -33,7 +33,7 @@ const copyStatic = {
       if (result.errors.length > 0) return;
       const manifest = JSON.parse(await readFile("app/manifest.json", "utf8"));
       await mkdir(outdir, { recursive: true });
-      await writeFile(`${outdir}/manifest.json`, JSON.stringify(resolveManifest(manifest), null, 2) + "\n");
+      await writeFile(`${outdir}/manifest.json`, `${JSON.stringify(resolveManifest(manifest), null, 2)}\n`);
       await cp("app/_locales", `${outdir}/_locales`, { recursive: true });
       await cp("app/images", `${outdir}/images`, { recursive: true });
       console.log(`[build] ${new Date().toLocaleTimeString()} ${vendor} done`);
