@@ -53,9 +53,10 @@ Copies the current page's title (or the selected text) together with its URL to 
 
 | Permission | Justification |
 |---|---|
+| `activeTab` | Lets the extension run its copy function in the current tab after the user clicks one of its menu items. Access lasts only for that tab and that click; the extension has no host permissions and no content script. |
 | `contextMenus` | Adds the two right-click menu items, "Copy Title and URL" and "Copy Selection and URL". |
 | `clipboardWrite` | Writes the title or selection and the URL to the clipboard. |
-| Host permissions `http://*/*`, `https://*/*` | Used only by the content script: after the user clicks one of the two menu items, it reads the page title, URL and selection and writes them to the clipboard. The background service worker cannot write to the clipboard and learns nothing about the page; it only tells the content script which menu item was clicked. The content script does nothing until then and sends no data anywhere. |
+| `scripting` | Runs the copy function in the clicked tab (`scripting.executeScript`). The background service worker cannot read the page title or selection or write to the clipboard itself, so the function runs in the page: it reads `document.title` or the selection and calls `navigator.clipboard.writeText`. Nothing is injected before a click and nothing is sent anywhere. |
 
 **Remote code:** No, I am not using remote code. (All code ships in the package; there is no `eval` and no remotely hosted script.)
 

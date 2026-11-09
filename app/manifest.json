@@ -19,27 +19,16 @@
   },
   "__firefox__browser_specific_settings": {
     "gecko": {
-      "id": "copy-title-url-ext@nunofaria11"
+      "id": "copy-title-url-ext@nunofaria11",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ],
-      "css": [
-        "styles/contentscript.css"
-      ],
-      "js": [
-        "scripts/contentscript.js"
-      ],
-      "run_at": "document_end",
-      "all_frames": false
-    }
-  ],
   "permissions": [
+    "activeTab",
     "contextMenus",
-    "clipboardWrite"
+    "clipboardWrite",
+    "scripting"
   ]
 }

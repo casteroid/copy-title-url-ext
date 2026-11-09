@@ -22,13 +22,13 @@ Every commit on `main` follows [Conventional Commits](https://www.conventionalco
 
 The highest bump among the commits since the last release wins. If those commits are all `docs`, `chore` and similar, there is nothing to release (you can still force a bump when you start the release).
 
-Scopes are optional and free-form. Use the area you touched: `background`, `content`, `menu`, `firefox`, `release`.
+Scopes are optional and free-form. Use the area you touched: `background`, `menu`, `firefox`, `release`.
 
 Examples:
 
 ```
 feat(menu): copy as markdown link
-fix(content): copy nothing when the selection is empty
+fix(background): copy nothing when the selection is empty
 feat(menu)!: copy the title and URL on one line
 
 BREAKING CHANGE: the copied text is "<title> <url>" instead of the title and URL on separate lines.

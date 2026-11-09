@@ -1,6 +1,6 @@
 # Copy Title and URL
 
-A Chrome and Firefox (Manifest V3) extension that adds two right-click menu items: **Copy Title and URL** copies the page title and its URL, and **Copy Selection and URL** copies the selected text and the URL. The clipboard gets the title or selection on the first line and the URL on the second. There are no settings, no storage and no network access. It is built with [webextension-toolbox](https://github.com/webextension-toolbox/webextension-toolbox).
+A Chrome and Firefox (Manifest V3) extension that adds two right-click menu items: **Copy Title and URL** copies the page title and its URL, and **Copy Selection and URL** copies the selected text and the URL. The clipboard gets the title or selection on the first line and the URL on the second. There are no settings, no storage, no network access and no content script: the extension only runs in a tab after you click one of its menu items. It is built with [webextension-toolbox](https://github.com/webextension-toolbox/webextension-toolbox).
 
 ## Build
 
@@ -31,11 +31,8 @@ Firefox:
 ## Architecture
 
 ```
-app/scripts/background.js     background script: creates the context-menu items, tells the tab which one was clicked
-app/scripts/contentscript.js  content script: receives { op } and copies the page title or selection with location.href
-app/scripts/ext.js            copyTitle and copySelection, which write to the clipboard
+app/scripts/background.js     creates the context-menu items; on a click, runs the copy function in the tab with scripting.executeScript (activeTab)
 app/scripts/browser.js        the chrome or browser global, picked at build time by process.env.VENDOR
-app/scripts/models.js         Operation, the message types
 scripts/release/              version planning, commit checks and Chrome Web Store upload, run by the GitHub workflows
 ```
 
