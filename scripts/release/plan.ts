@@ -9,7 +9,7 @@
 import { execFileSync } from "node:child_process";
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
-import { bumpFor, nextVersion, parseCommit, releaseNotes, type Bump, type ParsedCommit } from "./conventional.ts";
+import { type Bump, bumpFor, nextVersion, type ParsedCommit, parseCommit, releaseNotes } from "./conventional.ts";
 import { commitsIn, lastReleaseTag } from "./git.ts";
 
 const MANIFEST = "app/manifest.json";
@@ -42,7 +42,9 @@ if (!previousTag) {
 } else {
   const bump: Bump | null = requested === "auto" ? bumpFor(commits) : requested;
   if (!bump) {
-    fail(`No feat, fix, perf or breaking commits since ${previousTag}, so there is nothing to release. Choose a bump to force one.`);
+    fail(
+      `No feat, fix, perf or breaking commits since ${previousTag}, so there is nothing to release. Choose a bump to force one.`,
+    );
   }
   version = nextVersion(current, bump);
 }
@@ -67,7 +69,6 @@ function fail(message: string): never {
   console.error(message);
   process.exit(1);
 }
-
 
 function manifestVersion(): string {
   const manifest: unknown = JSON.parse(readFileSync(MANIFEST, "utf8"));

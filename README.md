@@ -1,13 +1,14 @@
 # Copy Title and URL
 
-A Chrome and Firefox (Manifest V3) extension that adds two right-click menu items: **Copy Title and URL** copies the page title and its URL, and **Copy Selection and URL** copies the selected text and the URL. The clipboard gets the title or selection on the first line and the URL on the second. There are no settings, no storage, no network access and no content script: the extension only runs in a tab after you click one of its menu items. It is built with [webextension-toolbox](https://github.com/webextension-toolbox/webextension-toolbox).
+A Chrome and Firefox (Manifest V3) extension that adds two right-click menu items: **Copy Title and URL** copies the page title and its URL, and **Copy Selection and URL** copies the selected text and the URL. The clipboard gets the title or selection on the first line and the URL on the second. There are no settings, no storage, no network access and no content script: the extension only runs in a tab after you click one of its menu items. It is written in TypeScript and bundled with [esbuild](https://esbuild.github.io/).
 
 ## Build
 
 ```sh
 npm install                 # Node 22.18 or newer
 npm run dev chrome          # or firefox; rebuilds dist/<vendor>/ on every change
-npm run build chrome        # or firefox; builds dist/<vendor>/ and packs it into packages/
+npm run build chrome        # or firefox; builds dist/<vendor>/ and zips it into packages/
+npm run typecheck           # tsc over scripts/release and app/
 npm test                    # vitest
 npm run package             # builds both: packages/copy-title-url-ext.v<version>.chrome.zip and .firefox.xpi
 ```
@@ -31,12 +32,13 @@ Firefox:
 ## Architecture
 
 ```
-app/scripts/background.js     creates the context-menu items; on a click, runs the copy function in the tab with scripting.executeScript (activeTab)
-app/scripts/browser.js        the chrome or browser global, picked at build time by process.env.VENDOR
+app/scripts/background.ts     creates the context-menu items; on a click, runs the copy function in the tab with scripting.executeScript (activeTab)
+app/manifest.json             shared manifest; keys named __chrome__x or __firefox__x are kept as x for that vendor only
+scripts/build.mjs             esbuild: bundles background.ts, resolves the manifest, copies _locales and images, zips dist/<vendor>/
 scripts/release/              version planning, commit checks and Chrome Web Store upload, run by the GitHub workflows
 ```
 
-`app/manifest.json` uses webextension-toolbox vendor prefixes: `__chrome__background` becomes a service worker and `__firefox__background` a background script, and `__firefox__browser_specific_settings` holds the Gecko id.
+The background script uses `globalThis.browser ?? chrome`, so one bundle serves both browsers; the only vendor differences are in the manifest (`background` and `browser_specific_settings`).
 
 ## Credits
 

@@ -13,9 +13,7 @@
     "service_worker": "scripts/background.js"
   },
   "__firefox__background": {
-    "scripts": [
-      "scripts/background.js"
-    ]
+    "scripts": ["scripts/background.js"]
   },
   "__firefox__browser_specific_settings": {
     "gecko": {
@@ -25,10 +23,5 @@
       }
     }
   },
-  "permissions": [
-    "activeTab",
-    "contextMenus",
-    "clipboardWrite",
-    "scripting"
-  ]
+  "permissions": ["activeTab", "contextMenus", "clipboardWrite", "scripting"]
 }
