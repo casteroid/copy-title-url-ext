@@ -53,14 +53,13 @@ Copies the current page's title (or the selected text) together with its URL to 
 
 | Permission | Justification |
 |---|---|
-| `activeTab` | Gives the extension the current tab's title and URL at the moment the user clicks one of its context-menu items. |
 | `contextMenus` | Adds the two right-click menu items, "Copy Title and URL" and "Copy Selection and URL". |
 | `clipboardWrite` | Writes the title or selection and the URL to the clipboard. |
-| Host permissions `http://*/*`, `https://*/*` | The content script that reads the selection and writes the clipboard must already be in the page when the user clicks a menu item: the background service worker has no access to the page selection or the clipboard. The content script does nothing until the background script sends it a message after a click. |
+| Host permissions `http://*/*`, `https://*/*` | Used only by the content script: after the user clicks one of the two menu items, it reads the page title, URL and selection and writes them to the clipboard. The background service worker cannot write to the clipboard and learns nothing about the page; it only tells the content script which menu item was clicked. The content script does nothing until then and sends no data anywhere. |
 
 **Remote code:** No, I am not using remote code. (All code ships in the package; there is no `eval` and no remotely hosted script.)
 
-**Data usage:** Tick **Website content** only. The store requires disclosing data an extension handles even when it never leaves the device ([User Data FAQ, question 3](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq)), and the extension reads the page title and the selected text. Nothing else applies: no personal, health, financial, authentication, location or communication data, no browsing history (the URL of the current tab is read only at the moment of a click and only goes to the clipboard), and no user activity tracking. Tick all three certifications (no selling or transferring of user data, no use unrelated to the single purpose, no use for creditworthiness or lending).
+**Data usage:** Tick **Website content** and **Web history**. The store requires disclosing data an extension handles even when it never leaves the device ([User Data FAQ, question 3](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq)). The extension reads the page title and the selected text (website content) and the page URL, which the FAQ counts as web browsing activity (question 4). Each is read only when the user clicks a menu item, and only goes to the clipboard. Nothing else applies: no personal, health, financial, authentication, location or communication data, and no user activity tracking. Tick all three certifications (no selling or transferring of user data, no use unrelated to the single purpose, no use for creditworthiness or lending).
 
 **Privacy policy URL:** https://github.com/casteroid/copy-title-url-ext/blob/main/PRIVACY.md
 
