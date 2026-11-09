@@ -7,17 +7,18 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "dev": "webextension-toolbox dev",
-    "build": "webextension-toolbox build",
-    "typecheck": "tsc --noEmit",
+    "dev": "node scripts/build.mjs --watch",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p app",
     "test": "vitest run",
     "package": "rm -rf dist packages && npm run build chrome && npm run build firefox",
     "release:plan": "node scripts/release/plan.ts",
     "lint:commits": "node scripts/release/lint-commits.ts"
   },
   "devDependencies": {
+    "@types/chrome": "^0.3.7",
     "@types/node": "^22.20.5",
-    "@webextension-toolbox/webextension-toolbox": "^7.1.1",
+    "esbuild": "^0.28.2",
     "typescript": "^7.0.2",
     "vitest": "^5.1.0"
   }

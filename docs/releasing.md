@@ -126,7 +126,7 @@ To retry only the store step for an existing release (for example after fixing t
 
 1. Download `copy-title-url-ext.v<version>.firefox.xpi` from the GitHub release.
 2. In the [AMO Developer Hub](https://addons.mozilla.org/developers/), open the add-on and click **Upload New Version**. Upload the xpi.
-3. The xpi is a webpack bundle, so AMO asks for the source code. Upload an archive of the tag:
+3. The xpi is an esbuild bundle, so AMO asks for the source code. Upload an archive of the tag:
 
    ```sh
    git archive --format=zip -o source.zip v<version>
