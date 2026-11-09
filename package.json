@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "node scripts/build.mjs --watch",
     "build": "node scripts/build.mjs",
+    "icons": "node scripts/icons.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p app",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",

@@ -9,6 +9,7 @@ npm install                 # Node 22.18 or newer
 npm run dev chrome          # or firefox; rebuilds dist/<vendor>/ on every change
 npm run build chrome        # or firefox; builds dist/<vendor>/ and zips it into packages/
 npm run typecheck           # tsc over scripts/release and app/
+npm run icons               # renders the pixel art in scripts/icons.mjs into app/images/ and promo/
 npm test                    # vitest
 npm run package             # builds both: packages/copy-title-url-ext.v<version>.chrome.zip and .firefox.xpi
 ```
@@ -35,6 +36,7 @@ Firefox:
 app/scripts/background.ts     creates the context-menu items; on a click, runs the copy function in the tab with scripting.executeScript (activeTab)
 app/manifest.json             shared manifest; keys named __chrome__x or __firefox__x are kept as x for that vendor only
 scripts/build.mjs             esbuild: bundles background.ts, resolves the manifest, copies _locales and images, zips dist/<vendor>/
+scripts/icons.mjs             pixel art for the icons; npm run icons renders app/images/*.png and the store icon
 scripts/release/              version planning, commit checks and Chrome Web Store upload, run by the GitHub workflows
 ```
 
