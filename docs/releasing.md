@@ -53,14 +53,14 @@ The Publish workflow authenticates to the Chrome Web Store API as a Google Cloud
 
 Install the [gcloud CLI](https://cloud.google.com/sdk/docs/install).
 
-A Chrome Web Store publisher can link only one service account. If `cws-publisher` and the `github` pool already exist from `due-date-highlighter-ext`, use that project, skip the create commands, and run only `providers create-oidc copy-title-url` and the `add-iam-policy-binding` for this repository.
+Done on 2026-11-09 in project `chrome-web-store-api-258321` (number `171512527082`): service account `cws-publisher`, pool `github`, provider `copy-title-url`, and the five repository variables. Keep the commands for a rebuild. A Chrome Web Store publisher can link only one service account, so another extension in the same publisher reuses this project and service account and adds only its own `providers create-oidc <name>` and `add-iam-policy-binding` for its repository.
 
 ```sh
-PROJECT_ID=due-date-highlighter          # any new or existing project
+PROJECT_ID=chrome-web-store-api-258321   # the project linked to the publisher
 REPO=casteroid/copy-title-url-ext
 SA=cws-publisher
 
-gcloud projects create "$PROJECT_ID"      # skip if it exists
+gcloud projects create "$PROJECT_ID"      # only for a brand-new project
 gcloud config set project "$PROJECT_ID"
 PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
 
