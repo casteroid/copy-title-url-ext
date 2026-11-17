@@ -8,7 +8,7 @@ The Chrome Web Store and Firefox Add-ons listings already exist. Keep the copy h
 
 **Name** (from the manifest, `appName` in `app/_locales/en/messages.json`): Copy Title and URL
 
-**Summary** (from the manifest `description`, `appDescription`, max 132 characters): An extension to copy the title/selection and URL of the current page, adds a context menu on right-click.
+**Summary** (from the manifest `description`, `appDescription`, max 132 characters): Copy the title or selection and the URL of the current page from the right-click menu, the toolbar button or Alt+Shift+C.
 
 **Category:** Productivity → Tools
 
@@ -23,15 +23,16 @@ The Chrome Web Store and Firefox Add-ons listings already exist. Keep the copy h
 **Detailed description:**
 
 ```
-Copy Title and URL adds two items to the right-click menu, so you can share or note a page in one click.
+Copy Title and URL lets you copy a page's title or selected text together with its URL, so you can share or note a page in one click.
 
 What it does
 • "Copy Title and URL" (right-click anywhere on a page) copies the page title and its address.
 • "Copy Selection and URL" (right-click on selected text) copies the selected text and the page address.
+• The toolbar button, or Alt+Shift+C (Option+Shift+C on macOS), copies the selected text and the address, or the title and the address when nothing is selected. You can change the shortcut in your browser's extension shortcut settings.
 
 The clipboard gets two lines: the title or selection first, then the URL. Paste it into a chat, a ticket, an email or your notes.
 
-Works in Chrome and Firefox. There are no settings.
+Works in Chrome and Firefox. There are no settings besides the shortcut.
 
 Privacy
 The title, URL and selection go to your clipboard and nowhere else. No accounts, no analytics, no network requests.
@@ -46,21 +47,21 @@ The title, URL and selection go to your clipboard and nowhere else. No accounts,
 **Single purpose:**
 
 ```
-Copies the current page's title (or the selected text) together with its URL to the clipboard from a right-click context menu.
+Copies the current page's title (or the selected text) together with its URL to the clipboard from a right-click context menu, the toolbar button or a keyboard shortcut.
 ```
 
 **Permission justifications:**
 
 | Permission | Justification |
 |---|---|
-| `activeTab` | Lets the extension run its copy function in the current tab after the user clicks one of its menu items. Access lasts only for that tab and that click; the extension has no host permissions and no content script. |
+| `activeTab` | Lets the extension run its copy function in the current tab after the user clicks one of its menu items or its toolbar button, or presses its keyboard shortcut. Access lasts only for that tab and that action; the extension has no host permissions and no content script. |
 | `contextMenus` | Adds the two right-click menu items, "Copy Title and URL" and "Copy Selection and URL". |
 | `clipboardWrite` | Writes the title or selection and the URL to the clipboard. |
-| `scripting` | Runs the copy function in the clicked tab (`scripting.executeScript`). The background service worker cannot read the page title or selection or write to the clipboard itself, so the function runs in the page: it reads `document.title` or the selection and calls `navigator.clipboard.writeText`. Nothing is injected before a click and nothing is sent anywhere. |
+| `scripting` | Runs the copy function in the current tab (`scripting.executeScript`). The background service worker cannot read the page title or selection or write to the clipboard itself, so the function runs in the page: it reads `document.title` or the selection and calls `navigator.clipboard.writeText`. Nothing is injected before the user acts and nothing is sent anywhere. |
 
 **Remote code:** No, I am not using remote code. (All code ships in the package; there is no `eval` and no remotely hosted script.)
 
-**Data usage:** Tick **Website content** and **Web history**. The store requires disclosing data an extension handles even when it never leaves the device ([User Data FAQ, question 3](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq)). The extension reads the page title and the selected text (website content) and the page URL, which the FAQ counts as web browsing activity (question 4). Each is read only when the user clicks a menu item, and only goes to the clipboard. Nothing else applies: no personal, health, financial, authentication, location or communication data, and no user activity tracking. Tick all three certifications (no selling or transferring of user data, no use unrelated to the single purpose, no use for creditworthiness or lending).
+**Data usage:** Tick **Website content** and **Web history**. The store requires disclosing data an extension handles even when it never leaves the device ([User Data FAQ, question 3](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq)). The extension reads the page title and the selected text (website content) and the page URL, which the FAQ counts as web browsing activity (question 4). Each is read only when the user clicks a menu item or the toolbar button, or presses the shortcut, and only goes to the clipboard. Nothing else applies: no personal, health, financial, authentication, location or communication data, and no user activity tracking. Tick all three certifications (no selling or transferring of user data, no use unrelated to the single purpose, no use for creditworthiness or lending).
 
 **Privacy policy URL:** https://github.com/casteroid/copy-title-url-ext/blob/main/PRIVACY.md
 

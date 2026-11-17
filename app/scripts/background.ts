@@ -12,8 +12,14 @@ const Menus = {
 // Runs inside the page via scripting.executeScript: it is serialised, so it
 // must not reference anything from this module.
 const copyToClipboard = (useSelection: boolean, url: string) => {
-  const first = useSelection ? (getSelection()?.toString().trim() ?? "") : document.title;
-  return navigator.clipboard.writeText(`${first}\n${url}`);
+  const selection = useSelection ? (getSelection()?.toString().trim() ?? "") : "";
+  return navigator.clipboard.writeText(`${selection || document.title}\n${url}`);
+};
+
+const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, url: string) => {
+  api.scripting
+    .executeScript({ target, func: copyToClipboard, args: [useSelection, url] })
+    .catch((error: unknown) => console.error("Copy Title and URL: copy failed", error));
 };
 
 const handleMenuClick = (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
@@ -33,12 +39,17 @@ const handleMenuClick = (info: chrome.contextMenus.OnClickData, tab?: chrome.tab
   const target: chrome.scripting.InjectionTarget = useSelection
     ? { tabId: tab.id, frameIds: [info.frameId ?? 0] }
     : { tabId: tab.id };
-  api.scripting
-    .executeScript({ target, func: copyToClipboard, args: [useSelection, info.pageUrl] })
-    .catch((error: unknown) => console.error("Copy Title and URL: copy failed", error));
+  copy(target, useSelection, info.pageUrl);
 };
 
 api.contextMenus.onClicked.addListener(handleMenuClick);
+
+// The toolbar button and its shortcut (_execute_action) do not say which frame holds the
+// selection, so only the top frame's selection is used, falling back to the title.
+api.action.onClicked.addListener((tab) => {
+  if (tab.id === undefined || tab.url === undefined) return;
+  copy({ tabId: tab.id }, true, tab.url);
+});
 
 api.runtime.onInstalled.addListener(() => {
   api.contextMenus.removeAll().then(() => {
