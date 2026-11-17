@@ -1,0 +1,10 @@
+{
+  "appName": { "message": "Titel und URL kopieren" },
+  "appDescription": {
+    "message": "Kopiert Titel oder Auswahl und URL der aktuellen Seite über das Kontextmenü, die Symbolleisten-Schaltfläche oder Alt+Umschalt+C."
+  },
+  "copyTitleUrlMenu": { "message": "Titel und URL kopieren" },
+  "copySelectionUrlMenu": { "message": "Auswahl und URL kopieren" },
+  "copyMarkdownMenu": { "message": "Als Markdown kopieren" },
+  "actionTitle": { "message": "Auswahl oder Titel und URL kopieren" }
+}
