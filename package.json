@@ -19,7 +19,7 @@
     "lint:commits": "node scripts/release/lint-commits.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.6",
+    "@biomejs/biome": "^2.6.7",
     "@types/chrome": "^0.3.7",
     "@types/node": "^22.20.5",
     "esbuild": "^0.28.2",
