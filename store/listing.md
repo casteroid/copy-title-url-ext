@@ -30,7 +30,7 @@ What it does
 • "Copy Selection and URL" (right-click on selected text) copies the selected text and the page address.
 • The toolbar button, or Alt+Shift+C (Option+Shift+C on macOS), copies the selected text and the address, or the title and the address when nothing is selected. You can change the shortcut in your browser's extension shortcut settings.
 
-The clipboard gets two lines: the title or selection first, then the URL. Paste it into a chat, a ticket, an email or your notes.
+The clipboard gets two lines: the title or selection first, then the URL. Paste it into a chat, a ticket, an email or your notes. When the toolbar icon is pinned, it briefly shows ✓ after a copy, or ! when the page could not be copied.
 
 Works in Chrome and Firefox. There are no settings besides the shortcut.
 

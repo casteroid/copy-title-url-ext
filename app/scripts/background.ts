@@ -10,16 +10,45 @@ const Menus = {
 } satisfies Record<string, Menu>;
 
 // Runs inside the page via scripting.executeScript: it is serialised, so it
-// must not reference anything from this module.
-const copyToClipboard = (useSelection: boolean, url: string) => {
+// must not reference anything from this module. Chrome resolves executeScript
+// with a null result when this rejects, so success is signalled by returning true.
+const copyToClipboard = async (useSelection: boolean, url: string) => {
   const selection = useSelection ? (getSelection()?.toString().trim() ?? "") : "";
-  return navigator.clipboard.writeText(`${selection || document.title}\n${url}`);
+  await navigator.clipboard.writeText(`${selection || document.title}\n${url}`);
+  return true;
+};
+
+const BADGE_MS = 1000;
+const badgeTimers = new Map<number, number>();
+
+const flashBadge = (tabId: number, copied: boolean) => {
+  clearTimeout(badgeTimers.get(tabId));
+  // The tab may close before the badge is set or cleared.
+  const ignore = () => {};
+  api.action.setBadgeBackgroundColor({ tabId, color: copied ? "#1a7f37" : "#d1242f" }).catch(ignore);
+  api.action.setBadgeText({ tabId, text: copied ? "✓" : "!" }).catch(ignore);
+  badgeTimers.set(
+    tabId,
+    setTimeout(() => {
+      badgeTimers.delete(tabId);
+      api.action.setBadgeText({ tabId, text: "" }).catch(ignore);
+    }, BADGE_MS),
+  );
 };
 
 const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, url: string) => {
   api.scripting
     .executeScript({ target, func: copyToClipboard, args: [useSelection, url] })
-    .catch((error: unknown) => console.error("Copy Title and URL: copy failed", error));
+    .then((results) => {
+      if (!results.every(({ result }) => result === true)) throw new Error("the page did not write the clipboard");
+    })
+    .then(
+      () => flashBadge(target.tabId, true),
+      (error: unknown) => {
+        console.error("Copy Title and URL: copy failed", error);
+        flashBadge(target.tabId, false);
+      },
+    );
 };
 
 const handleMenuClick = (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
@@ -47,7 +76,9 @@ api.contextMenus.onClicked.addListener(handleMenuClick);
 // The toolbar button and its shortcut (_execute_action) do not say which frame holds the
 // selection, so only the top frame's selection is used, falling back to the title.
 api.action.onClicked.addListener((tab) => {
-  if (tab.id === undefined || tab.url === undefined) return;
+  if (tab.id === undefined) return;
+  // No URL means the browser withheld activeTab, as on chrome:// and about: pages.
+  if (tab.url === undefined) return flashBadge(tab.id, false);
   copy({ tabId: tab.id }, true, tab.url);
 });
 
