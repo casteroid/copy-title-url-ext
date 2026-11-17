@@ -1,3 +1,5 @@
+import { removeTrackingParams } from "./url";
+
 // Firefox exposes the promise-based `browser`; Chrome exposes `chrome` (and `browser` from 137).
 declare var browser: typeof chrome | undefined;
 const api = globalThis.browser ?? chrome;
@@ -66,7 +68,7 @@ const flashBadge = (tabId: number, copied: boolean) => {
 
 const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, format: Format, url: string) => {
   api.scripting
-    .executeScript({ target, func: copyToClipboard, args: [useSelection, format, url] })
+    .executeScript({ target, func: copyToClipboard, args: [useSelection, format, removeTrackingParams(url)] })
     .then((results) => {
       if (!results.every(({ result }) => result === true)) throw new Error("the page did not write the clipboard");
     })

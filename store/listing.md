@@ -33,7 +33,7 @@ What it does
 
 The clipboard gets two lines: the title or selection first, then the URL. Apps that accept formatted text, such as Slack, Google Docs, Notion or Gmail, paste a linked title instead. When the toolbar icon is pinned, it briefly shows ✓ after a copy, or ! when the page could not be copied.
 
-Works in Chrome and Firefox. There are no settings besides the shortcut.
+Works in Chrome and Firefox. Copied addresses lose their tracking parameters (utm_*, fbclid, gclid, mc_eid). There are no settings besides the shortcut.
 
 Privacy
 The title, URL and selection go to your clipboard and nowhere else. No accounts, no analytics, no network requests.
