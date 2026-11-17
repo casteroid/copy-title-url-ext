@@ -36,11 +36,13 @@ Firefox:
 
 ```
 app/scripts/background.ts     creates the context-menu items; on a menu click, a toolbar-button click or the shortcut, runs the copy function in the tab with scripting.executeScript (activeTab)
+app/scripts/copy.ts           the copy function that runs in the page: reads the title or selection and writes the clipboard
 app/scripts/url.ts            removes tracking parameters from the copied URL
 app/manifest.json             shared manifest; keys named __chrome__x or __firefox__x are kept as x for that vendor only
 scripts/build.mjs             esbuild: bundles background.ts, resolves the manifest, copies _locales and images, zips dist/<vendor>/
 scripts/icons.mjs             pixel art for the icons; npm run icons renders app/images/*.png and the store icon
 scripts/release/              version planning, commit checks and Chrome Web Store upload, run by the GitHub workflows
+test/                         vitest: test/app/ covers the extension (typechecked with app/tsconfig.json), the rest covers the release scripts
 ```
 
 The background script uses `globalThis.browser ?? chrome`, so one bundle serves both browsers; the only vendor differences are in the manifest (`background` and `browser_specific_settings`).
