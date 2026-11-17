@@ -76,6 +76,7 @@ const render = (scale, padding) => {
 
 const OUTPUTS = [
   { path: "app/images/icon-16.png", scale: 1, padding: 0 },
+  { path: "app/images/icon-32.png", scale: 2, padding: 0 },
   { path: "app/images/icon-128.png", scale: 8, padding: 0 },
   // Chrome Web Store: 96 px artwork inside a 16 px transparent margin.
   { path: "promo/Chrome-Webstore-Icon_128x128.png", scale: 6, padding: 16 },

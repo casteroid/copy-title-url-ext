@@ -1,7 +1,7 @@
 {
   "name": "copy-title-url-ext",
   "version": "0.0.5",
-  "description": "An extension to copy the title/selection and URL of the current page, adds a context menu on right-click.",
+  "description": "Copy the title or selection and the URL of the current page from the right-click menu, the toolbar button or Alt+Shift+C.",
   "private": true,
   "engines": {
     "node": ">=22.18"

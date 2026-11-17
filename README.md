@@ -1,6 +1,6 @@
 # Copy Title and URL
 
-A Chrome and Firefox (Manifest V3) extension that adds two right-click menu items: **Copy Title and URL** copies the page title and its URL, and **Copy Selection and URL** copies the selected text and the URL. The clipboard gets the title or selection on the first line and the URL on the second. There are no settings, no storage, no network access and no content script: the extension only runs in a tab after you click one of its menu items. It is written in TypeScript and bundled with [esbuild](https://esbuild.github.io/).
+A Chrome and Firefox (Manifest V3) extension that adds two right-click menu items: **Copy Title and URL** copies the page title and its URL, and **Copy Selection and URL** copies the selected text and the URL. Clicking the toolbar button, or pressing **Alt+Shift+C** (Option+Shift+C on macOS), copies the selected text and the URL, or the title and the URL when nothing is selected. The shortcut can be changed at `chrome://extensions/shortcuts` in Chrome, or in Firefox at about:addons → gear → **Manage Extension Shortcuts**. The clipboard gets the title or selection on the first line and the URL on the second. After each copy the toolbar icon shows a green ✓ for a second, or a red ! when the copy failed (for example on `chrome://` and `about:` pages); this is only visible when the icon is pinned. There are no settings, no storage, no network access and no content script: the extension only runs in a tab after you click one of its menu items or its toolbar button, or press its shortcut. It is written in TypeScript and bundled with [esbuild](https://esbuild.github.io/).
 
 ## Build
 
@@ -33,7 +33,7 @@ Firefox:
 ## Architecture
 
 ```
-app/scripts/background.ts     creates the context-menu items; on a click, runs the copy function in the tab with scripting.executeScript (activeTab)
+app/scripts/background.ts     creates the context-menu items; on a menu click, a toolbar-button click or the shortcut, runs the copy function in the tab with scripting.executeScript (activeTab)
 app/manifest.json             shared manifest; keys named __chrome__x or __firefox__x are kept as x for that vendor only
 scripts/build.mjs             esbuild: bundles background.ts, resolves the manifest, copies _locales and images, zips dist/<vendor>/
 scripts/icons.mjs             pixel art for the icons; npm run icons renders app/images/*.png and the store icon
