@@ -2,19 +2,47 @@
 declare var browser: typeof chrome | undefined;
 const api = globalThis.browser ?? chrome;
 
-type Menu = { id: string; i18nKey: string; contexts: [`${chrome.contextMenus.ContextType}`] };
+type Menu = {
+  id: string;
+  i18nKey: string;
+  contexts: [`${chrome.contextMenus.ContextType}`, ...`${chrome.contextMenus.ContextType}`[]];
+};
 
 const Menus = {
   copyTitle: { id: "copy_title_url_menu", i18nKey: "copyTitleUrlMenu", contexts: ["page"] },
   copySelection: { id: "copy_selection_url_menu", i18nKey: "copySelectionUrlMenu", contexts: ["selection"] },
+  copyMarkdown: { id: "copy_markdown_menu", i18nKey: "copyMarkdownMenu", contexts: ["page", "selection"] },
 } satisfies Record<string, Menu>;
+
+// "lines" is the title or selection and the URL on two lines; "markdown" is [title](url).
+type Format = "lines" | "markdown";
 
 // Runs inside the page via scripting.executeScript: it is serialised, so it
 // must not reference anything from this module. Chrome resolves executeScript
 // with a null result when this rejects, so success is signalled by returning true.
-const copyToClipboard = async (useSelection: boolean, url: string) => {
+const copyToClipboard = async (useSelection: boolean, format: Format, url: string) => {
   const selection = useSelection ? (getSelection()?.toString().trim() ?? "") : "";
-  await navigator.clipboard.writeText(`${selection || document.title}\n${url}`);
+  const text = selection || document.title;
+  if (format === "markdown") {
+    const label = text.replace(/\s+/g, " ").replace(/[\\[\]]/g, "\\$&");
+    await navigator.clipboard.writeText(`[${label}](${url.replace(/\(/g, "%28").replace(/\)/g, "%29")})`);
+    return true;
+  }
+  const plain = `${text}\n${url}`;
+  // ClipboardItem is missing in Firefox before 127: copy plain text only there.
+  if (typeof ClipboardItem === "undefined") {
+    await navigator.clipboard.writeText(plain);
+    return true;
+  }
+  const escapeHtml = (value: string) =>
+    value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const html = `<a href="${escapeHtml(url)}">${escapeHtml(text)}</a>`;
+  await navigator.clipboard.write([
+    new ClipboardItem({
+      "text/plain": new Blob([plain], { type: "text/plain" }),
+      "text/html": new Blob([html], { type: "text/html" }),
+    }),
+  ]);
   return true;
 };
 
@@ -36,9 +64,9 @@ const flashBadge = (tabId: number, copied: boolean) => {
   );
 };
 
-const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, url: string) => {
+const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, format: Format, url: string) => {
   api.scripting
-    .executeScript({ target, func: copyToClipboard, args: [useSelection, url] })
+    .executeScript({ target, func: copyToClipboard, args: [useSelection, format, url] })
     .then((results) => {
       if (!results.every(({ result }) => result === true)) throw new Error("the page did not write the clipboard");
     })
@@ -54,12 +82,17 @@ const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, u
 const handleMenuClick = (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
   if (tab?.id === undefined || info.pageUrl === undefined) return;
   let useSelection: boolean;
+  let format: Format = "lines";
   switch (info.menuItemId) {
     case Menus.copyTitle.id:
       useSelection = false;
       break;
     case Menus.copySelection.id:
       useSelection = true;
+      break;
+    case Menus.copyMarkdown.id:
+      useSelection = info.selectionText !== undefined;
+      format = "markdown";
       break;
     default:
       return;
@@ -68,7 +101,7 @@ const handleMenuClick = (info: chrome.contextMenus.OnClickData, tab?: chrome.tab
   const target: chrome.scripting.InjectionTarget = useSelection
     ? { tabId: tab.id, frameIds: [info.frameId ?? 0] }
     : { tabId: tab.id };
-  copy(target, useSelection, info.pageUrl);
+  copy(target, useSelection, format, info.pageUrl);
 };
 
 api.contextMenus.onClicked.addListener(handleMenuClick);
@@ -79,7 +112,7 @@ api.action.onClicked.addListener((tab) => {
   if (tab.id === undefined) return;
   // No URL means the browser withheld activeTab, as on chrome:// and about: pages.
   if (tab.url === undefined) return flashBadge(tab.id, false);
-  copy({ tabId: tab.id }, true, tab.url);
+  copy({ tabId: tab.id }, true, "lines", tab.url);
 });
 
 api.runtime.onInstalled.addListener(() => {

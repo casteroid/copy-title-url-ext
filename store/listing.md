@@ -28,9 +28,10 @@ Copy Title and URL lets you copy a page's title or selected text together with i
 What it does
 • "Copy Title and URL" (right-click anywhere on a page) copies the page title and its address.
 • "Copy Selection and URL" (right-click on selected text) copies the selected text and the page address.
+• "Copy as Markdown" copies a Markdown link, [title](address), using the selected text instead of the title when there is a selection.
 • The toolbar button, or Alt+Shift+C (Option+Shift+C on macOS), copies the selected text and the address, or the title and the address when nothing is selected. You can change the shortcut in your browser's extension shortcut settings.
 
-The clipboard gets two lines: the title or selection first, then the URL. Paste it into a chat, a ticket, an email or your notes. When the toolbar icon is pinned, it briefly shows ✓ after a copy, or ! when the page could not be copied.
+The clipboard gets two lines: the title or selection first, then the URL. Apps that accept formatted text, such as Slack, Google Docs, Notion or Gmail, paste a linked title instead. When the toolbar icon is pinned, it briefly shows ✓ after a copy, or ! when the page could not be copied.
 
 Works in Chrome and Firefox. There are no settings besides the shortcut.
 
@@ -55,9 +56,9 @@ Copies the current page's title (or the selected text) together with its URL to 
 | Permission | Justification |
 |---|---|
 | `activeTab` | Lets the extension run its copy function in the current tab after the user clicks one of its menu items or its toolbar button, or presses its keyboard shortcut. Access lasts only for that tab and that action; the extension has no host permissions and no content script. |
-| `contextMenus` | Adds the two right-click menu items, "Copy Title and URL" and "Copy Selection and URL". |
+| `contextMenus` | Adds the three right-click menu items, "Copy Title and URL", "Copy Selection and URL" and "Copy as Markdown". |
 | `clipboardWrite` | Writes the title or selection and the URL to the clipboard. |
-| `scripting` | Runs the copy function in the current tab (`scripting.executeScript`). The background service worker cannot read the page title or selection or write to the clipboard itself, so the function runs in the page: it reads `document.title` or the selection and calls `navigator.clipboard.writeText`. Nothing is injected before the user acts and nothing is sent anywhere. |
+| `scripting` | Runs the copy function in the current tab (`scripting.executeScript`). The background service worker cannot read the page title or selection or write to the clipboard itself, so the function runs in the page: it reads `document.title` or the selection and writes the clipboard with `navigator.clipboard`. Nothing is injected before the user acts and nothing is sent anywhere. |
 
 **Remote code:** No, I am not using remote code. (All code ships in the package; there is no `eval` and no remotely hosted script.)
 
