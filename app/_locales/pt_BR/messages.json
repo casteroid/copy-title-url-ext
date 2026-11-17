@@ -1,0 +1,10 @@
+{
+  "appName": { "message": "Copiar título e URL" },
+  "appDescription": {
+    "message": "Copie o título ou a seleção e a URL da página atual pelo menu de contexto, pelo botão da barra de ferramentas ou com Alt+Shift+C."
+  },
+  "copyTitleUrlMenu": { "message": "Copiar título e URL" },
+  "copySelectionUrlMenu": { "message": "Copiar seleção e URL" },
+  "copyMarkdownMenu": { "message": "Copiar como Markdown" },
+  "actionTitle": { "message": "Copiar seleção ou título e URL" }
+}
