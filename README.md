@@ -8,10 +8,9 @@ A Chrome and Firefox extension (Manifest V3) that copies the current page's titl
 |---|---|
 | Right-click → **Copy Title and URL** | The page title and the URL |
 | Right-click selected text → **Copy Selection and URL** | The selected text and the URL |
-| Right-click → **Copy as Markdown** | `[title](url)`, using the selected text instead of the title when there is a selection |
 | Toolbar button, or **Alt+Shift+C** (Option+Shift+C on macOS) | The selected text and the URL, or the title and the URL when nothing is selected |
 
-- **Format:** the title or selection goes on the first line and the URL on the second. The clipboard also gets an HTML link, so rich-text apps such as Slack, Google Docs or Gmail paste a linked title. Firefox before 127 lacks `ClipboardItem` and gets plain text only.
+- **Format:** the title or selection goes on the first line and the URL on the second. The clipboard also gets an HTML link, so rich-text apps such as Slack, Google Docs or Gmail paste a linked title, and editors that turn pasted HTML into Markdown, such as Obsidian, paste `[title](url)`. Firefox before 127 lacks `ClipboardItem` and gets plain text only.
 - **Clean URLs:** tracking parameters (`utm_*`, `fbclid`, `gclid`, `mc_eid`) are removed. Every other parameter and the `#fragment` stay as they were.
 - **Feedback:** after each copy the toolbar icon shows a green ✓ for a second, or a red ! when the copy failed, for example on `chrome://` and `about:` pages. You only see this when the icon is pinned.
 - **Shortcut:** change it at `chrome://extensions/shortcuts` in Chrome, or in Firefox at about:addons → gear → **Manage Extension Shortcuts**.

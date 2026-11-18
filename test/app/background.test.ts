@@ -46,25 +46,17 @@ afterEach(() => {
 
 describe("copy triggers", () => {
   it.each([
-    { menuItemId: "copy_title_url_menu", target: { tabId: 1 }, args: [false, "lines"] },
-    { menuItemId: "copy_selection_url_menu", target: { tabId: 1, frameIds: [3] }, args: [true, "lines"] },
-    { menuItemId: "copy_markdown_menu", target: { tabId: 1, frameIds: [3] }, args: [true, "markdown"] },
-  ])("$menuItemId runs in $target with $args", ({ menuItemId, target, args }) => {
+    { menuItemId: "copy_title_url_menu", target: { tabId: 1 }, useSelection: false },
+    { menuItemId: "copy_selection_url_menu", target: { tabId: 1, frameIds: [3] }, useSelection: true },
+  ])("$menuItemId runs in $target", ({ menuItemId, target, useSelection }) => {
     menuClick({ menuItemId, frameId: 3, selectionText: "x" });
-    expect(executeScript).toHaveBeenCalledWith(expect.objectContaining({ target, args: [...args, CLEAN_URL] }));
-  });
-
-  it("copies the title as Markdown when nothing is selected", () => {
-    menuClick({ menuItemId: "copy_markdown_menu", frameId: 3 });
-    expect(executeScript).toHaveBeenCalledWith(
-      expect.objectContaining({ target: { tabId: 1 }, args: [false, "markdown", CLEAN_URL] }),
-    );
+    expect(executeScript).toHaveBeenCalledWith(expect.objectContaining({ target, args: [useSelection, CLEAN_URL] }));
   });
 
   it("copies the top frame's selection or title from the toolbar button", () => {
     actionClick({ url: URL });
     expect(executeScript).toHaveBeenCalledWith(
-      expect.objectContaining({ target: { tabId: 1 }, args: [true, "lines", CLEAN_URL] }),
+      expect.objectContaining({ target: { tabId: 1 }, args: [true, CLEAN_URL] }),
     );
   });
 });
