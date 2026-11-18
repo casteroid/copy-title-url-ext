@@ -1,6 +1,6 @@
 {
   "name": "copy-title-url-ext",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Copy the title or selection and the URL of the current page from the right-click menu, the toolbar button or Alt+Shift+C.",
   "private": true,
   "engines": {
