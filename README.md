@@ -29,7 +29,7 @@ npm install
 npm run dev chrome          # or firefox; rebuilds dist/<vendor>/ on every change
 npm run build chrome        # or firefox; builds dist/<vendor>/ and zips it into packages/
 npm run package             # builds both: packages/copy-title-url-ext.v<version>.chrome.zip and .firefox.xpi
-npm run typecheck           # tsc over scripts/release and app/
+npm run typecheck           # tsc over test/ and app/
 npm test                    # vitest
 npm run icons               # renders the pixel art in scripts/icons.mjs into app/images/ and promo/
 ```
@@ -58,15 +58,14 @@ The code is TypeScript, bundled with [esbuild](https://esbuild.github.io/).
 | `app/manifest.json` | Shared manifest. Keys named `__chrome__x` or `__firefox__x` are kept as `x` for that vendor only. |
 | `scripts/build.mjs` | esbuild: bundles `background.ts`, resolves the manifest, copies `_locales` and images, zips `dist/<vendor>/`. |
 | `scripts/icons.mjs` | Pixel art for the icons. `npm run icons` renders `app/images/*.png` and the store icon. |
-| `scripts/release/` | Version planning, commit checks and the Chrome Web Store and Firefox Add-ons uploads, run by the GitHub workflows. |
-| `test/` | Vitest. `test/app/` covers the extension and is typechecked with `app/tsconfig.json`; the rest covers the release scripts. |
+| `test/` | Vitest. `test/app/` covers the extension and is typechecked with `app/tsconfig.json`; the rest is typechecked with the root `tsconfig.json`. |
 
 The background script uses `globalThis.browser ?? chrome`, so one bundle serves both browsers. The only vendor differences are in the manifest (`background` and `browser_specific_settings`).
 
 ## Contributing and releases
 
 - Commits follow Conventional Commits, which set the version number. See [CONTRIBUTING.md](CONTRIBUTING.md).
-- Releases are started by hand from the GitHub Actions tab and published to the Chrome Web Store and Firefox Add-ons automatically. See [docs/releasing.md](docs/releasing.md).
+- Releases are started by hand from the GitHub Actions tab and published to the Chrome Web Store and Firefox Add-ons automatically, by the shared workflows in [casteroid/webext-release](https://github.com/casteroid/webext-release). See [docs/releasing.md](docs/releasing.md).
 - Store listing text for both stores is in [`store/listing.md`](store/listing.md); the images are in `promo/`.
 
 ## Credits

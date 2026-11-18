@@ -24,23 +24,7 @@ jobs:
       - run: npm ci
 
       - name: Check commit messages
-        env:
-          EVENT: ${{ github.event_name }}
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD: ${{ github.event.pull_request.head.sha }}
-          BEFORE: ${{ github.event.before }}
-          AFTER: ${{ github.sha }}
-        run: |
-          if [ "$EVENT" = "pull_request" ]; then
-            range="$PR_BASE..$PR_HEAD"
-          elif [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            # New branch, or a force push left the old tip unreachable: check everything since the
-            # last release tag. "Initial commit" and "Create LICENSE" predate the convention.
-            range="$(git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' "$AFTER")..$AFTER"
-          else
-            range="$BEFORE..$AFTER"
-          fi
-          npm run lint:commits -- "$range"
+        uses: casteroid/webext-release/lint-commits@08dbf20cfed9cbcf0407529d222cc9d53f085577 # v1.0.0
 
       - run: npm run typecheck
 

@@ -34,7 +34,7 @@ feat(menu)!: copy the title and URL on one line
 BREAKING CHANGE: the copied text is "<title> <url>" instead of the title and URL on separate lines.
 ```
 
-Rules the checker enforces (`npm run lint:commits -- <range>`):
+Rules the checker enforces (the `lint-commits` action from [casteroid/webext-release](https://github.com/casteroid/webext-release)):
 
 - The type is lower case and one of the types in the table.
 - There is exactly one space after the colon and the subject is not empty.
@@ -49,7 +49,7 @@ Only the release workflow writes `chore(release): vX.Y.Z` commits and changes th
 ```sh
 npm install
 npm run dev chrome      # or firefox; watch build into dist/<vendor>/
-npm test                # release-script unit tests
+npm test                # vitest
 npm run package         # build chrome and firefox, zips land in packages/
 ```
 

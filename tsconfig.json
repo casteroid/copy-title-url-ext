@@ -13,6 +13,6 @@
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true
   },
-  "include": ["scripts/release", "test", "vitest.config.mts"],
+  "include": ["test", "vitest.config.mts"],
   "exclude": ["test/app"]
 }

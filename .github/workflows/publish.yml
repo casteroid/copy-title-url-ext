@@ -1,13 +1,8 @@
 name: Publish
 
-# Called by the Release workflow after it creates a release: uploads it to the Chrome Web Store and Firefox Add-ons.
-# Run it by hand to retry a release tag.
+# Retries the store uploads for an existing release tag. Release already publishes; run this only when a store job
+# failed or was skipped. See https://github.com/casteroid/webext-release.
 on:
-  workflow_call:
-    inputs:
-      tag:
-        type: string
-        required: true
   workflow_dispatch:
     inputs:
       tag:
@@ -17,95 +12,17 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  chrome-not-configured:
-    if: vars.CWS_EXTENSION_ID == ''
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "::notice::CWS_EXTENSION_ID is not set, so ${{ inputs.tag }} was not sent to the Chrome Web Store. See docs/releasing.md."
-
-  chrome:
-    if: vars.CWS_EXTENSION_ID != ''
-    runs-on: ubuntu-latest
-    environment: chrome-web-store
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.tag }}
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-
-      - name: Download release package
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.tag }}
-        run: gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "*.chrome.zip" --dir release
-
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-          token_format: access_token
-          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
-          create_credentials_file: false
-          export_environment_variables: false
-
-      - name: Upload and submit for review
-        env:
-          CWS_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
-          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
-          CWS_EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
-          CWS_PUBLISH_TYPE: ${{ vars.CWS_PUBLISH_TYPE }}
-          TAG: ${{ inputs.tag }}
-        run: CWS_EXPECTED_VERSION="${TAG#v}" node scripts/release/cws.ts release/*.chrome.zip
-
-  firefox:
-    runs-on: ubuntu-latest
-    environment: firefox-add-ons
-    env:
+  publish:
+    permissions:
+      contents: read
+      id-token: write
+    uses: casteroid/webext-release/.github/workflows/publish.yml@08dbf20cfed9cbcf0407529d222cc9d53f085577 # v1.0.0
+    with:
+      tag: ${{ inputs.tag }}
+      chrome-package: "*.chrome.zip"
+      firefox-package: "*.firefox.xpi"
+    secrets:
       AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
       AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
-      AMO_ADDON_ID: ${{ vars.AMO_ADDON_ID }}
-    steps:
-      # Secrets are not available in a job-level `if`, so this step gates the rest.
-      - name: Check configuration
-        id: config
-        env:
-          TAG: ${{ inputs.tag }}
-        run: |
-          if [ -z "$AMO_JWT_ISSUER" ] || [ -z "$AMO_JWT_SECRET" ] || [ -z "$AMO_ADDON_ID" ]; then
-            echo "::notice::AMO_JWT_ISSUER, AMO_JWT_SECRET or AMO_ADDON_ID is not set, so $TAG was not sent to Firefox Add-ons. See docs/releasing.md."
-          else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - uses: actions/checkout@v7
-        if: steps.config.outputs.configured == 'true'
-        with:
-          ref: ${{ inputs.tag }}
-
-      - uses: actions/setup-node@v7
-        if: steps.config.outputs.configured == 'true'
-        with:
-          node-version: 22
-
-      - name: Download release package and archive the source
-        if: steps.config.outputs.configured == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.tag }}
-        run: |
-          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "*.firefox.xpi" --dir release
-          git archive --format=zip -o release/source.zip HEAD
-
-      - name: Upload to Firefox Add-ons
-        if: steps.config.outputs.configured == 'true'
-        env:
-          TAG: ${{ inputs.tag }}
-        run: AMO_EXPECTED_VERSION="${TAG#v}" node scripts/release/amo.ts release/*.firefox.xpi release/source.zip
