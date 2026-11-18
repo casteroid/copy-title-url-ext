@@ -5,6 +5,5 @@
   },
   "copyTitleUrlMenu": { "message": "Titel und URL kopieren" },
   "copySelectionUrlMenu": { "message": "Auswahl und URL kopieren" },
-  "copyMarkdownMenu": { "message": "Als Markdown kopieren" },
   "actionTitle": { "message": "Auswahl oder Titel und URL kopieren" }
 }

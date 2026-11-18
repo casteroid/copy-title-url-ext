@@ -1,20 +1,17 @@
-import { copyToClipboard, type Format } from "./copy";
+import { copyToClipboard } from "./copy";
 import { removeTrackingParams } from "./url";
 
 // Firefox exposes the promise-based `browser`; Chrome exposes `chrome` (and `browser` from 137).
 declare var browser: typeof chrome | undefined;
 const api = globalThis.browser ?? chrome;
 
-type Menu = {
-  id: string;
-  i18nKey: string;
-  contexts: [`${chrome.contextMenus.ContextType}`, ...`${chrome.contextMenus.ContextType}`[]];
-};
+type Menu = { id: string; i18nKey: string; contexts: [`${chrome.contextMenus.ContextType}`] };
 
+// Each item has its own context, so only one shows at a time and Chrome does not
+// group them into a submenu.
 const Menus = {
   copyTitle: { id: "copy_title_url_menu", i18nKey: "copyTitleUrlMenu", contexts: ["page"] },
   copySelection: { id: "copy_selection_url_menu", i18nKey: "copySelectionUrlMenu", contexts: ["selection"] },
-  copyMarkdown: { id: "copy_markdown_menu", i18nKey: "copyMarkdownMenu", contexts: ["page", "selection"] },
 } satisfies Record<string, Menu>;
 
 const BADGE_MS = 1000;
@@ -35,9 +32,9 @@ const flashBadge = (tabId: number, copied: boolean) => {
   );
 };
 
-const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, format: Format, url: string) => {
+const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, url: string) => {
   api.scripting
-    .executeScript({ target, func: copyToClipboard, args: [useSelection, format, removeTrackingParams(url)] })
+    .executeScript({ target, func: copyToClipboard, args: [useSelection, removeTrackingParams(url)] })
     .then((results) => {
       if (!results.every(({ result }) => result === true)) throw new Error("the page did not write the clipboard");
     })
@@ -53,17 +50,12 @@ const copy = (target: chrome.scripting.InjectionTarget, useSelection: boolean, f
 const handleMenuClick = (info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) => {
   if (tab?.id === undefined || info.pageUrl === undefined) return;
   let useSelection: boolean;
-  let format: Format = "lines";
   switch (info.menuItemId) {
     case Menus.copyTitle.id:
       useSelection = false;
       break;
     case Menus.copySelection.id:
       useSelection = true;
-      break;
-    case Menus.copyMarkdown.id:
-      useSelection = info.selectionText !== undefined;
-      format = "markdown";
       break;
     default:
       return;
@@ -72,7 +64,7 @@ const handleMenuClick = (info: chrome.contextMenus.OnClickData, tab?: chrome.tab
   const target: chrome.scripting.InjectionTarget = useSelection
     ? { tabId: tab.id, frameIds: [info.frameId ?? 0] }
     : { tabId: tab.id };
-  copy(target, useSelection, format, info.pageUrl);
+  copy(target, useSelection, info.pageUrl);
 };
 
 api.contextMenus.onClicked.addListener(handleMenuClick);
@@ -83,7 +75,7 @@ api.action.onClicked.addListener((tab) => {
   if (tab.id === undefined) return;
   // No URL means the browser withheld activeTab, as on chrome:// and about: pages.
   if (tab.url === undefined) return flashBadge(tab.id, false);
-  copy({ tabId: tab.id }, true, "lines", tab.url);
+  copy({ tabId: tab.id }, true, tab.url);
 });
 
 api.runtime.onInstalled.addListener(() => {

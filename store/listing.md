@@ -28,7 +28,6 @@ Copy Title and URL lets you copy a page's title or selected text together with i
 What it does
 • "Copy Title and URL" (right-click anywhere on a page) copies the page title and its address.
 • "Copy Selection and URL" (right-click on selected text) copies the selected text and the page address.
-• "Copy as Markdown" copies a Markdown link, [title](address), using the selected text instead of the title when there is a selection.
 • The toolbar button, or Alt+Shift+C (Option+Shift+C on macOS), copies the selected text and the address, or the title and the address when nothing is selected. You can change the shortcut in your browser's extension shortcut settings.
 
 The clipboard gets two lines: the title or selection first, then the URL. Apps that accept formatted text, such as Slack, Google Docs, Notion or Gmail, paste a linked title instead. When the toolbar icon is pinned, it briefly shows ✓ after a copy, or ! when the page could not be copied.
@@ -56,7 +55,7 @@ Copies the current page's title (or the selected text) together with its URL to 
 | Permission | Justification |
 |---|---|
 | `activeTab` | Lets the extension run its copy function in the current tab after the user clicks one of its menu items or its toolbar button, or presses its keyboard shortcut. Access lasts only for that tab and that action; the extension has no host permissions and no content script. |
-| `contextMenus` | Adds the three right-click menu items, "Copy Title and URL", "Copy Selection and URL" and "Copy as Markdown". |
+| `contextMenus` | Adds the right-click menu items "Copy Title and URL" (on a page) and "Copy Selection and URL" (on selected text). |
 | `clipboardWrite` | Writes the title or selection and the URL to the clipboard. |
 | `scripting` | Runs the copy function in the current tab (`scripting.executeScript`). The background service worker cannot read the page title or selection or write to the clipboard itself, so the function runs in the page: it reads `document.title` or the selection and writes the clipboard with `navigator.clipboard`. Nothing is injected before the user acts and nothing is sent anywhere. |
 
@@ -98,7 +97,6 @@ O Copiar título e URL copia o título ou o texto selecionado de uma página jun
 O que faz
 • "Copiar título e URL" (clique com o botão direito em qualquer parte da página) copia o título da página e o endereço.
 • "Copiar seleção e URL" (clique com o botão direito no texto selecionado) copia o texto selecionado e o endereço da página.
-• "Copiar como Markdown" copia uma ligação Markdown, [título](endereço), usando o texto selecionado em vez do título quando existe uma seleção.
 • O botão da barra de ferramentas, ou Alt+Shift+C (Option+Shift+C no macOS), copia o texto selecionado e o endereço, ou o título e o endereço quando não há nada selecionado. Pode alterar o atalho nas definições de atalhos de extensões do navegador.
 
 A área de transferência recebe duas linhas: primeiro o título ou a seleção, depois o URL. As aplicações que aceitam texto formatado, como o Slack, o Google Docs, o Notion ou o Gmail, colam antes um título com ligação. Quando o ícone está afixado na barra de ferramentas, mostra brevemente ✓ depois de copiar, ou ! quando não foi possível copiar a página.
@@ -117,7 +115,6 @@ O Copiar título e URL copia o título ou o texto selecionado de uma página jun
 O que ele faz
 • "Copiar título e URL" (clique com o botão direito em qualquer lugar da página) copia o título da página e o endereço.
 • "Copiar seleção e URL" (clique com o botão direito no texto selecionado) copia o texto selecionado e o endereço da página.
-• "Copiar como Markdown" copia um link Markdown, [título](endereço), usando o texto selecionado no lugar do título quando há uma seleção.
 • O botão da barra de ferramentas, ou Alt+Shift+C (Option+Shift+C no macOS), copia o texto selecionado e o endereço, ou o título e o endereço quando nada está selecionado. Você pode mudar o atalho nas configurações de atalhos de extensões do navegador.
 
 A área de transferência recebe duas linhas: primeiro o título ou a seleção, depois a URL. Apps que aceitam texto formatado, como Slack, Google Docs, Notion ou Gmail, colam um título com link. Quando o ícone está fixado na barra de ferramentas, ele mostra rapidamente ✓ depois de copiar, ou ! quando não foi possível copiar a página.
@@ -136,7 +133,6 @@ Copiar título y URL copia el título o el texto seleccionado de una página jun
 Qué hace
 • «Copiar título y URL» (clic derecho en cualquier parte de la página) copia el título de la página y su dirección.
 • «Copiar selección y URL» (clic derecho sobre el texto seleccionado) copia el texto seleccionado y la dirección de la página.
-• «Copiar como Markdown» copia un enlace Markdown, [título](dirección), con el texto seleccionado en lugar del título cuando hay una selección.
 • El botón de la barra de herramientas, o Alt+Mayús+C (Opción+Mayús+C en macOS), copia el texto seleccionado y la dirección, o el título y la dirección cuando no hay nada seleccionado. Puedes cambiar el atajo en la configuración de atajos de extensiones del navegador.
 
 El portapapeles recibe dos líneas: primero el título o la selección y después la URL. Las aplicaciones que aceptan texto con formato, como Slack, Google Docs, Notion o Gmail, pegan en su lugar un título enlazado. Cuando el icono está fijado en la barra de herramientas, muestra brevemente ✓ tras copiar, o ! si no se pudo copiar la página.
@@ -155,7 +151,6 @@ Copier le titre et l'URL copie le titre ou le texte sélectionné d'une page ave
 Ce que fait l'extension
 • « Copier le titre et l'URL » (clic droit n'importe où sur la page) copie le titre de la page et son adresse.
 • « Copier la sélection et l'URL » (clic droit sur le texte sélectionné) copie le texte sélectionné et l'adresse de la page.
-• « Copier en Markdown » copie un lien Markdown, [titre](adresse), avec le texte sélectionné à la place du titre s'il y a une sélection.
 • Le bouton de la barre d'outils, ou Alt+Maj+C (Option+Maj+C sur macOS), copie le texte sélectionné et l'adresse, ou le titre et l'adresse si rien n'est sélectionné. Vous pouvez changer le raccourci dans les paramètres des raccourcis d'extensions de votre navigateur.
 
 Le presse-papiers reçoit deux lignes : d'abord le titre ou la sélection, puis l'URL. Les applications qui acceptent le texte mis en forme, comme Slack, Google Docs, Notion ou Gmail, collent plutôt un titre avec lien. Quand l'icône est épinglée dans la barre d'outils, elle affiche brièvement ✓ après une copie, ou ! si la page n'a pas pu être copiée.
@@ -174,7 +169,6 @@ Titel und URL kopieren kopiert den Titel oder den markierten Text einer Seite zu
 Funktionen
 • „Titel und URL kopieren“ (Rechtsklick irgendwo auf der Seite) kopiert den Seitentitel und die Adresse.
 • „Auswahl und URL kopieren“ (Rechtsklick auf markierten Text) kopiert den markierten Text und die Adresse der Seite.
-• „Als Markdown kopieren“ kopiert einen Markdown-Link, [Titel](Adresse), mit dem markierten Text statt des Titels, wenn etwas markiert ist.
 • Die Schaltfläche in der Symbolleiste oder Alt+Umschalt+C (Wahl+Umschalt+C unter macOS) kopiert den markierten Text und die Adresse oder, wenn nichts markiert ist, den Titel und die Adresse. Das Tastenkürzel können Sie in den Erweiterungs-Tastenkürzeln Ihres Browsers ändern.
 
 In die Zwischenablage kommen zwei Zeilen: zuerst der Titel oder die Auswahl, dann die URL. Apps, die formatierten Text annehmen, etwa Slack, Google Docs, Notion oder Gmail, fügen stattdessen einen verlinkten Titel ein. Wenn das Symbol an die Symbolleiste angeheftet ist, zeigt es nach dem Kopieren kurz ✓ an, oder !, wenn die Seite nicht kopiert werden konnte.
