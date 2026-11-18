@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: casteroid/webext-release/.github/workflows/release.yml@08dbf20cfed9cbcf0407529d222cc9d53f085577 # v1.0.0
+    uses: casteroid/webext-release/.github/workflows/release.yml@6d7e6dc000cfd09f1642b0182ec57912c68b9d2c # v1.0.1
     with:
       manifest: app/manifest.json
       check: npm run typecheck && npm test
