@@ -14,7 +14,8 @@
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "test": "vitest run",
-    "package": "rm -rf dist packages && npm run build chrome && npm run build firefox"
+    "package": "rm -rf dist packages && npm run build chrome && npm run build firefox",
+    "site": "node scripts/site.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.7",

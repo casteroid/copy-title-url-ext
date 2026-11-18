@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Copy the page title or your selection, together with its URL, from the right-click menu, the toolbar button or Alt+Shift+C.">
+    <title>Copy Title and URL</title>
+    <link rel="icon" href="img/icon-32.png">
+    <link rel="stylesheet" href="style.css">
+    <script>
+      // Chromium-based browsers install from the Chrome Web Store. Unknown browsers keep both store links.
+      document.documentElement.dataset.browser = navigator.userAgent.includes("Firefox/") ? "firefox"
+        : navigator.userAgentData?.brands.some((b) => b.brand === "Chromium") ? "chrome" : "";
+    </script>
+    <script src="demo.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <img class="icon" src="img/icon-128.png" alt="" width="64" height="64">
+        <h1>Copy Title and URL</h1>
+        <p class="stripe" aria-hidden="true"><span class="ink"></span><span class="mid"></span><span class="light"></span></p>
+        <p class="tagline">The page title or your selection, and its URL, on the clipboard in one go.</p>
+        <p class="actions">
+          <a class="button primary" data-only="chrome" href="https://chromewebstore.google.com/detail/copy-title-and-url/eepifgllapjhlplohodldfjlipmbeeij">Install from the Chrome Web Store</a>
+          <a class="button primary" data-only="firefox" href="https://addons.mozilla.org/firefox/addon/copy-title-and-url-ext/">Install from Firefox Add-ons</a>
+          <a class="button" href="https://github.com/casteroid/copy-title-url-ext">Source on GitHub</a>
+        </p>
+        <p class="note also" data-only="chrome">Also for Firefox, on <a href="https://addons.mozilla.org/firefox/addon/copy-title-and-url-ext/">Firefox Add-ons</a>.</p>
+        <p class="note also" data-only="firefox">Also for Chrome, on the <a href="https://chromewebstore.google.com/detail/copy-title-and-url/eepifgllapjhlplohodldfjlipmbeeij">Chrome Web Store</a>.</p>
+      </header>
+
+      <section id="try">
+        <h2>Try it here</h2>
+        <ol class="steps">
+          <li>Select a sentence in the window below.</li>
+          <li>Press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> (<kbd>Option</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> on macOS), or right-click the selection and pick <strong>Copy Selection and URL</strong>. With nothing selected, the shortcut copies the page title instead.</li>
+          <li>Paste into the box under the window to see what landed on the clipboard.</li>
+        </ol>
+
+        <div class="window">
+          <div class="titlebar">
+            <span>Copy Title and URL</span>
+            <span class="dots" aria-hidden="true"><i></i><i></i></span>
+          </div>
+          <div class="window-body">
+            <p>A link on its own says little. <code>example.com/a1b2c3</code> could be anything until someone opens it.</p>
+            <p>A title on its own is worse: you know what the page was, but not where it lives.</p>
+            <p>Together they make a note you can find again, a message a colleague can trust, and a reading list that still makes sense next year.</p>
+          </div>
+        </div>
+
+        <p class="simulate">
+          <button class="button" id="simulate" type="button">Copy like the extension</button>
+          <span class="note" id="simulate-status" role="status">No extension yet? This button runs the extension's own copy code on this page.</span>
+        </p>
+
+        <label class="paste-label" for="paste">Paste here</label>
+        <textarea class="paste" id="paste" rows="3" placeholder="Ctrl+V or ⌘V"></textarea>
+
+        <dl class="result" id="result" hidden>
+          <dt>Rich text</dt>
+          <dd id="result-rich"></dd>
+          <dt>HTML</dt>
+          <dd><pre id="result-html"></pre></dd>
+          <dt>Markdown</dt>
+          <dd><pre id="result-markdown"></pre></dd>
+        </dl>
+        <p class="note" id="tracking" hidden>The address bar has tracking parameters. The copied URL leaves them out and keeps the rest.</p>
+
+        <p class="note">Clean URLs: <a href="?utm_source=newsletter&amp;fbclid=IwAR0demo&amp;ref=docs#try">open this page with tracking parameters</a> and copy again. <code>utm_source</code> and <code>fbclid</code> are dropped, <code>ref</code> and <code>#try</code> stay.</p>
+      </section>
+
+      <section id="features">
+        <h2>What it does</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>Right-click menu</h3>
+            <p><strong>Copy Title and URL</strong> anywhere on a page. <strong>Copy Selection and URL</strong> on selected text, including text inside frames.</p>
+          </article>
+          <article class="card">
+            <h3>Button and shortcut</h3>
+            <p>The toolbar button or <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> copies the selection, or the title when nothing is selected. Change the shortcut in your browser's extension shortcut settings.</p>
+          </article>
+          <article class="card">
+            <h3>Two formats</h3>
+            <p>Plain text is the title or selection on one line and the URL on the next. Slack, Google Docs, Notion and Gmail paste a linked title instead, and Obsidian pastes <code>[title](url)</code>.</p>
+          </article>
+          <article class="card">
+            <h3>Clean URLs</h3>
+            <p><code>utm_*</code>, <code>fbclid</code>, <code>gclid</code> and <code>mc_eid</code> are removed. Every other parameter and the <code>#fragment</code> stay as they were.</p>
+          </article>
+          <article class="card">
+            <h3>Feedback</h3>
+            <p>A pinned toolbar icon flashes <code>✓</code> after a copy, or <code>!</code> on pages the browser keeps closed, such as <code>chrome://</code> and <code>about:</code>.</p>
+          </article>
+          <article class="card">
+            <h3>Languages</h3>
+            <p>English, Portuguese (Portugal and Brazil), Spanish, French and German.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="privacy">
+        <h2>Privacy</h2>
+        <p>No settings, no storage, no network access and no content script. The extension only runs in a tab after you click one of its menu items or its toolbar button, or press its shortcut. The title, URL and selection go to your clipboard and nowhere else.</p>
+        <p><a href="https://github.com/casteroid/copy-title-url-ext/blob/main/PRIVACY.md">Read the privacy policy</a></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        <a href="https://github.com/casteroid/copy-title-url-ext">GitHub</a> ·
+        <a href="https://chromewebstore.google.com/detail/copy-title-and-url/eepifgllapjhlplohodldfjlipmbeeij">Chrome Web Store</a> ·
+        <a href="https://addons.mozilla.org/firefox/addon/copy-title-and-url-ext/">Firefox Add-ons</a> ·
+        <a href="https://github.com/casteroid/copy-title-url-ext/issues">Issues</a>
+      </p>
+      <p>No cookies and no tracking on this page either. Its scripts pick the store link for your browser and run the demo; nothing you paste leaves the page.</p>
+    </footer>
+  </body>
+</html>
