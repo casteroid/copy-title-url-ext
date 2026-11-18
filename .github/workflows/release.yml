@@ -101,3 +101,6 @@ jobs:
     uses: ./.github/workflows/publish.yml
     with:
       tag: ${{ needs.release.outputs.tag }}
+    # A called workflow sees no secrets unless the caller passes them, even environment secrets of a job that
+    # names the environment. The AMO credentials live in the firefox-add-ons environment.
+    secrets: inherit
