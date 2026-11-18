@@ -24,7 +24,7 @@ jobs:
       - run: npm ci
 
       - name: Check commit messages
-        uses: casteroid/webext-release/lint-commits@08dbf20cfed9cbcf0407529d222cc9d53f085577 # v1.0.0
+        uses: casteroid/webext-release/lint-commits@6d7e6dc000cfd09f1642b0182ec57912c68b9d2c # v1.0.1
 
       - run: npm run typecheck
 
