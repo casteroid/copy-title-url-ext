@@ -1,145 +1,40 @@
 # Releasing
 
-Releases are started by hand. After that, the Chrome Web Store and Firefox Add-ons (AMO) uploads are automatic. If the AMO secrets are missing or the job fails, upload by hand: see [Firefox by hand (fallback)](#firefox-by-hand-fallback).
+Releases are started by hand. After that, the Chrome Web Store and Firefox Add-ons (AMO) uploads are automatic. If the AMO upload is skipped or fails, upload by hand: see [Firefox by hand (fallback)](#firefox-by-hand-fallback).
 
-```mermaid
-flowchart LR
-  A[Actions → Release → Run workflow] --> B[Next version from Conventional Commits]
-  B --> C["chore(release): vX.Y.Z commit + vX.Y.Z tag"]
-  C --> D[GitHub release with the Chrome zip and the Firefox xpi]
-  D --> E[Publish workflow]
-  E --> F[Upload to the Chrome Web Store and submit for review]
-  E --> G[Upload the xpi and the source archive to AMO]
-  F --> H[Live after review]
-  G --> H
-```
+The workflows here are thin callers of the shared ones in [casteroid/webext-release](https://github.com/casteroid/webext-release). Its README explains how the version is chosen, the one-time store setup and the troubleshooting table. This page holds what is specific to this extension.
 
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `.github/workflows/ci.yml` | push to `main`, pull requests | Checks commit messages, type-checks, runs tests, builds and uploads the Chrome zip and the Firefox xpi as an artifact |
-| `.github/workflows/release.yml` | manual (Actions tab) | Picks the version, commits it, tags `vX.Y.Z`, creates the GitHub release with the Chrome zip and the Firefox xpi, calls Publish |
-| `.github/workflows/publish.yml` | called by Release, or manual with a tag | Uploads that release's Chrome zip to the Chrome Web Store and submits it for review; uploads the Firefox xpi plus a source archive of the tag to AMO as a new listed version |
+| `.github/workflows/release.yml` | manual (Actions tab) | Runs `npm run typecheck && npm test`, picks the version, commits it, tags `vX.Y.Z`, creates the GitHub release with the Chrome zip and the Firefox xpi, then uploads them to both stores |
+| `.github/workflows/publish.yml` | manual with a tag | Uploads an existing release to both stores again |
 
 The packages are `packages/copy-title-url-ext.v<version>.chrome.zip` and `packages/copy-title-url-ext.v<version>.firefox.xpi`, built by `npm run package`.
 
-## How the version is chosen
+The workflows pin webext-release to a full commit SHA, with the tag in a comment. Dependabot opens a pull request when a new tag is out; update all three files together.
 
-The Release workflow looks at the commits since the last `v*` tag (see [CONTRIBUTING.md](../CONTRIBUTING.md)):
-
-- any breaking change → major
-- otherwise any `feat` → minor
-- otherwise any `fix` or `perf` → patch
-- otherwise nothing to release; the run fails and says so
-
-The **bump** input overrides this (`patch`, `minor`, `major`). **Dry run** prints the version and notes in the run summary and changes nothing.
-
-The last tag is `v0.0.3`. The commits that added this release setup are `build`, `ci`, `test` and `docs` commits, so they release nothing. Run the first automated release with **bump = patch** (`v0.0.4`).
-
-The Chrome Web Store and AMO only accept a package whose version is higher than the last uploaded one, so never move or reuse a tag.
-
-## Existing listings
-
-Both store listings already exist, so there is nothing to create:
+## Listings
 
 - Chrome Web Store: item `eepifgllapjhlplohodldfjlipmbeeij`, <https://chromewebstore.google.com/detail/copy-title-and-url/eepifgllapjhlplohodldfjlipmbeeij>.
-- Firefox Add-ons: `copy-title-and-url-ext`, <https://addons.mozilla.org/en-US/firefox/addon/copy-title-and-url-ext/>.
+- Firefox Add-ons: `copy-title-and-url-ext`, guid `copy-title-url-ext@nunofaria11`, <https://addons.mozilla.org/en-US/firefox/addon/copy-title-and-url-ext/>.
 
 Listing copy for both stores is in [`store/listing.md`](../store/listing.md).
 
-## Automation setup (once)
+## Store setup
 
-The Publish workflow authenticates to the Chrome Web Store API as a Google Cloud **service account**, using **Workload Identity Federation**: GitHub's OIDC token is exchanged for a short-lived access token, so no key or refresh token is stored in GitHub.
+Done, following the [webext-release store setup](https://github.com/casteroid/webext-release#store-setup-once-per-extension):
 
-### 1. Google Cloud service account
+- Chrome, 2026-11-09: Workload Identity provider `copy-title-url` in project `chrome-web-store-api-258321`, and the repository variables `CWS_PUBLISHER_ID`, `CWS_EXTENSION_ID`, `CWS_PUBLISH_TYPE`, `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_SERVICE_ACCOUNT`.
+- Firefox, 2026-11-18: `AMO_JWT_ISSUER` and `AMO_JWT_SECRET` in the `firefox-add-ons` environment, and the repository variable `AMO_ADDON_ID` = `copy-title-url-ext@nunofaria11`.
 
-Install the [gcloud CLI](https://cloud.google.com/sdk/docs/install).
-
-Done on 2026-11-09 in project `chrome-web-store-api-258321` (number `171512527082`): service account `cws-publisher`, pool `github`, provider `copy-title-url`, and the five repository variables. Keep the commands for a rebuild. A Chrome Web Store publisher can link only one service account, so another extension in the same publisher reuses this project and service account and adds only its own `providers create-oidc <name>` and `add-iam-policy-binding` for its repository.
-
-```sh
-PROJECT_ID=chrome-web-store-api-258321   # the project linked to the publisher
-REPO=casteroid/copy-title-url-ext
-SA=cws-publisher
-
-gcloud projects create "$PROJECT_ID"      # only for a brand-new project
-gcloud config set project "$PROJECT_ID"
-PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
-
-gcloud services enable chromewebstore.googleapis.com iamcredentials.googleapis.com sts.googleapis.com
-
-gcloud iam service-accounts create "$SA" --display-name="Chrome Web Store publisher"
-
-gcloud iam workload-identity-pools create github --location=global --display-name="GitHub Actions"
-
-gcloud iam workload-identity-pools providers create-oidc copy-title-url \
-  --location=global \
-  --workload-identity-pool=github \
-  --issuer-uri="https://token.actions.githubusercontent.com" \
-  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
-  --attribute-condition="assertion.repository == '$REPO'"
-
-gcloud iam service-accounts add-iam-policy-binding "$SA@$PROJECT_ID.iam.gserviceaccount.com" \
-  --role=roles/iam.workloadIdentityUser \
-  --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository/$REPO"
-
-# Values for the GitHub variables below:
-echo "GCP_WORKLOAD_IDENTITY_PROVIDER=projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/providers/copy-title-url"
-echo "GCP_SERVICE_ACCOUNT=$SA@$PROJECT_ID.iam.gserviceaccount.com"
-```
-
-The attribute condition means only workflows in this repository can use this provider.
-
-### 2. Link the service account to the store
-
-In the [Developer Dashboard](https://chrome.google.com/webstore/devconsole/), open **Account**, add the service account email (`cws-publisher@<project>.iam.gserviceaccount.com`) under the service account section, and save. Skip this if it is already linked. On the same page, copy the **Publisher ID**.
-
-### 3. GitHub variables
-
-None of these values are secrets, so they are repository variables:
-
-```sh
-gh variable set CWS_PUBLISHER_ID --body "<publisher id>"
-gh variable set CWS_EXTENSION_ID --body "eepifgllapjhlplohodldfjlipmbeeij"
-gh variable set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/<number>/locations/global/workloadIdentityPools/github/providers/copy-title-url"
-gh variable set GCP_SERVICE_ACCOUNT --body "cws-publisher@<project>.iam.gserviceaccount.com"
-# Optional: STAGED_PUBLISH waits for you to press Publish in the dashboard after approval.
-gh variable set CWS_PUBLISH_TYPE --body "DEFAULT_PUBLISH"
-```
-
-Until `CWS_EXTENSION_ID` is set, the Publish job logs `CWS_EXTENSION_ID is not set` and skips.
-
-Publishing runs in the `chrome-web-store` GitHub environment, which GitHub creates on the first run. To approve every store submission by hand, add yourself as a required reviewer under **Settings → Environments → chrome-web-store**.
-
-### 4. Check it
-
-Run **Release** with **bump = patch**. The Publish job should log `Upload: SUCCEEDED` and `Submitted for review`.
-
-### 5. Firefox Add-ons (AMO)
-
-The Firefox job signs its AMO API requests with a JWT issuer and secret, stored as environment secrets.
-
-Open <https://addons.mozilla.org/developers/addon/api/key/>, click **Generate new credentials**, and copy the JWT issuer and the JWT secret. Then:
-
-```sh
-gh api -X PUT "repos/casteroid/copy-title-url-ext/environments/firefox-add-ons"
-gh secret set AMO_JWT_ISSUER --env firefox-add-ons   # paste the JWT issuer, e.g. user:12345678:123
-gh secret set AMO_JWT_SECRET --env firefox-add-ons   # paste the JWT secret
-gh variable set AMO_ADDON_ID --body "copy-title-url-ext@nunofaria11"
-```
-
-`AMO_ADDON_ID` is the `browser_specific_settings.gecko.id` from `app/manifest.json` (the slug `copy-title-and-url-ext` also works).
-
-Until all three are set, the Firefox job logs `AMO_JWT_ISSUER, AMO_JWT_SECRET or AMO_ADDON_ID is not set` and skips. To approve every AMO upload by hand, add yourself as a required reviewer under **Settings → Environments → firefox-add-ons**, same as for Chrome.
-
-Check it: run **Release** with **bump = patch**. The Firefox job should log `Created listed version X.Y.Z (id N) with source; it is awaiting review.`
-
-## Every release after that
+## Every release
 
 1. Merge or push your Conventional Commits to `main` and wait for CI to pass.
 2. **Actions → Release → Run workflow** on `main`. Optionally run a dry run first to read the notes.
 3. Watch the reviews in the Chrome dashboard and the AMO Developer Hub. With `DEFAULT_PUBLISH` the Chrome version goes live as soon as it is approved.
 
-To retry the store uploads for an existing release (for example after fixing the GitHub variables or secrets), run **Actions → Publish** with the tag, e.g. `v0.0.4`. Both store jobs run again; a store that already has the version fails on its own job only.
+To retry the store uploads for an existing release (for example after fixing a variable or a secret), run **Actions → Publish** with the tag, e.g. `v0.1.1`. Both store jobs run again; a store that already has the version fails on its own job only.
 
 ## Firefox by hand (fallback)
 
@@ -154,21 +49,3 @@ Use this when the AMO secrets are not set or the Firefox job failed.
    ```
 
    The build steps in [README.md](../README.md) are the build instructions reviewers need.
-
-## Troubleshooting
-
-| Symptom | Cause and fix |
-|---|---|
-| Release fails with "nothing to release" | Only `docs`, `chore` and similar commits since the last tag. Pick a bump explicitly if you really want a release. |
-| Release fails with "manifest says X but the last release tag is Y" | Someone changed the version by hand. Put `app/manifest.json` and `package.json` back to the tag's version. |
-| `git push` in Release is rejected | `main` moved while the workflow ran, or branch protection blocks the bot. Rerun; with branch protection, allow GitHub Actions to push to `main`. |
-| Auth step fails with `Permission 'iam.serviceAccounts.getAccessToken' denied` | The `workloadIdentityUser` binding or the repository name in the attribute condition is wrong. |
-| Upload returns 401 or 403 | The service account is not linked in the dashboard, or `CWS_PUBLISHER_ID` belongs to another publisher. |
-| Upload fails because of the version | A package with that version was already uploaded. Release again; the new version will be higher. |
-| Publish is refused while an item is in review | Wait for the review to finish, or cancel the pending submission in the dashboard, then rerun **Publish** with the tag. |
-| Publish is refused after you changed visibility in the dashboard | Publish once by hand from the dashboard; the API then works again. |
-| Firefox job fails with 401 on `POST .../addons/upload/` | `AMO_JWT_ISSUER` or `AMO_JWT_SECRET` is wrong or was revoked. Generate new credentials and set both secrets again. |
-| Firefox job logs `AMO rejected the package` | The validation messages above it say what to fix in the manifest or the code. Release again after the fix. |
-| Firefox job fails on `POST .../versions/` with "Version X already exists" | That version is already on AMO, for example after a manual upload. Nothing to do; the next release has a higher version. |
-
-References: [Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api), [service accounts](https://developer.chrome.com/docs/webstore/service-accounts), [google-github-actions/auth](https://github.com/google-github-actions/auth), [AMO add-ons API](https://mozilla.github.io/addons-server/topics/api/addons.html), [AMO API authentication](https://mozilla.github.io/addons-server/topics/api/auth.html), [AMO source code submission](https://extensionworkshop.com/documentation/publish/source-code-submission/).
