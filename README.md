@@ -59,7 +59,7 @@ The code is TypeScript, bundled with [esbuild](https://esbuild.github.io/).
 | `app/manifest.json` | Shared manifest. Keys named `__chrome__x` or `__firefox__x` are kept as `x` for that vendor only. |
 | `scripts/build.mjs` | esbuild: bundles `background.ts`, resolves the manifest, copies `_locales` and images, zips `dist/<vendor>/`. |
 | `scripts/icons.mjs` | Pixel art for the icons. `npm run icons` renders `app/images/*.png` and the store icon. |
-| `scripts/release/` | Version planning, commit checks and the Chrome Web Store upload, run by the GitHub workflows. |
+| `scripts/release/` | Version planning, commit checks and the Chrome Web Store and Firefox Add-ons uploads, run by the GitHub workflows. |
 | `test/` | Vitest. `test/app/` covers the extension and is typechecked with `app/tsconfig.json`; the rest covers the release scripts. |
 
 The background script uses `globalThis.browser ?? chrome`, so one bundle serves both browsers. The only vendor differences are in the manifest (`background` and `browser_specific_settings`).
@@ -67,7 +67,7 @@ The background script uses `globalThis.browser ?? chrome`, so one bundle serves 
 ## Contributing and releases
 
 - Commits follow Conventional Commits, which set the version number. See [CONTRIBUTING.md](CONTRIBUTING.md).
-- Releases are started by hand from the GitHub Actions tab and published to the Chrome Web Store automatically. The Firefox package is uploaded to AMO by hand. See [docs/releasing.md](docs/releasing.md).
+- Releases are started by hand from the GitHub Actions tab and published to the Chrome Web Store and Firefox Add-ons automatically. See [docs/releasing.md](docs/releasing.md).
 - Store listing text for both stores is in [`store/listing.md`](store/listing.md); the images are in `promo/`.
 
 ## Credits

@@ -1,6 +1,6 @@
 # Releasing
 
-Releases are started by hand. After that, the Chrome Web Store step is automatic. The Firefox Add-ons (AMO) upload is a manual step: see [Firefox (by hand)](#firefox-by-hand).
+Releases are started by hand. After that, the Chrome Web Store and Firefox Add-ons (AMO) uploads are automatic. If the AMO secrets are missing or the job fails, upload by hand: see [Firefox by hand (fallback)](#firefox-by-hand-fallback).
 
 ```mermaid
 flowchart LR
@@ -8,16 +8,17 @@ flowchart LR
   B --> C["chore(release): vX.Y.Z commit + vX.Y.Z tag"]
   C --> D[GitHub release with the Chrome zip and the Firefox xpi]
   D --> E[Publish workflow]
-  E --> F[Upload to the Chrome Web Store]
-  F --> G[Submit for review]
-  G --> H[Live after review]
+  E --> F[Upload to the Chrome Web Store and submit for review]
+  E --> G[Upload the xpi and the source archive to AMO]
+  F --> H[Live after review]
+  G --> H
 ```
 
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `.github/workflows/ci.yml` | push to `main`, pull requests | Checks commit messages, type-checks, runs tests, builds and uploads the Chrome zip and the Firefox xpi as an artifact |
 | `.github/workflows/release.yml` | manual (Actions tab) | Picks the version, commits it, tags `vX.Y.Z`, creates the GitHub release with the Chrome zip and the Firefox xpi, calls Publish |
-| `.github/workflows/publish.yml` | called by Release, or manual with a tag | Uploads that release's Chrome zip to the store and submits it for review |
+| `.github/workflows/publish.yml` | called by Release, or manual with a tag | Uploads that release's Chrome zip to the Chrome Web Store and submits it for review; uploads the Firefox xpi plus a source archive of the tag to AMO as a new listed version |
 
 The packages are `packages/copy-title-url-ext.v<version>.chrome.zip` and `packages/copy-title-url-ext.v<version>.firefox.xpi`, built by `npm run package`.
 
@@ -113,16 +114,36 @@ Publishing runs in the `chrome-web-store` GitHub environment, which GitHub creat
 
 Run **Release** with **bump = patch**. The Publish job should log `Upload: SUCCEEDED` and `Submitted for review`.
 
+### 5. Firefox Add-ons (AMO)
+
+The Firefox job signs its AMO API requests with a JWT issuer and secret, stored as environment secrets.
+
+Open <https://addons.mozilla.org/developers/addon/api/key/>, click **Generate new credentials**, and copy the JWT issuer and the JWT secret. Then:
+
+```sh
+gh api -X PUT "repos/casteroid/copy-title-url-ext/environments/firefox-add-ons"
+gh secret set AMO_JWT_ISSUER --env firefox-add-ons   # paste the JWT issuer, e.g. user:12345678:123
+gh secret set AMO_JWT_SECRET --env firefox-add-ons   # paste the JWT secret
+gh variable set AMO_ADDON_ID --body "copy-title-url-ext@nunofaria11"
+```
+
+`AMO_ADDON_ID` is the `browser_specific_settings.gecko.id` from `app/manifest.json` (the slug `copy-title-and-url-ext` also works).
+
+Until all three are set, the Firefox job logs `AMO_JWT_ISSUER, AMO_JWT_SECRET or AMO_ADDON_ID is not set` and skips. To approve every AMO upload by hand, add yourself as a required reviewer under **Settings → Environments → firefox-add-ons**, same as for Chrome.
+
+Check it: run **Release** with **bump = patch**. The Firefox job should log `Created listed version X.Y.Z (id N) with source; it is awaiting review.`
+
 ## Every release after that
 
 1. Merge or push your Conventional Commits to `main` and wait for CI to pass.
 2. **Actions → Release → Run workflow** on `main`. Optionally run a dry run first to read the notes.
-3. Watch the review in the dashboard. With `DEFAULT_PUBLISH` the version goes live as soon as it is approved.
-4. Upload the same version to Firefox Add-ons by hand (next section).
+3. Watch the reviews in the Chrome dashboard and the AMO Developer Hub. With `DEFAULT_PUBLISH` the Chrome version goes live as soon as it is approved.
 
-To retry only the store step for an existing release (for example after fixing the GitHub variables), run **Actions → Publish to Chrome Web Store** with the tag, e.g. `v0.0.4`.
+To retry the store uploads for an existing release (for example after fixing the GitHub variables or secrets), run **Actions → Publish** with the tag, e.g. `v0.0.4`. Both store jobs run again; a store that already has the version fails on its own job only.
 
-## Firefox (by hand)
+## Firefox by hand (fallback)
+
+Use this when the AMO secrets are not set or the Firefox job failed.
 
 1. Download `copy-title-url-ext.v<version>.firefox.xpi` from the GitHub release.
 2. In the [AMO Developer Hub](https://addons.mozilla.org/developers/), open the add-on and click **Upload New Version**. Upload the xpi.
@@ -146,5 +167,8 @@ To retry only the store step for an existing release (for example after fixing t
 | Upload fails because of the version | A package with that version was already uploaded. Release again; the new version will be higher. |
 | Publish is refused while an item is in review | Wait for the review to finish, or cancel the pending submission in the dashboard, then rerun **Publish** with the tag. |
 | Publish is refused after you changed visibility in the dashboard | Publish once by hand from the dashboard; the API then works again. |
+| Firefox job fails with 401 on `POST .../addons/upload/` | `AMO_JWT_ISSUER` or `AMO_JWT_SECRET` is wrong or was revoked. Generate new credentials and set both secrets again. |
+| Firefox job logs `AMO rejected the package` | The validation messages above it say what to fix in the manifest or the code. Release again after the fix. |
+| Firefox job fails on `POST .../versions/` with "Version X already exists" | That version is already on AMO, for example after a manual upload. Nothing to do; the next release has a higher version. |
 
-References: [Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api), [service accounts](https://developer.chrome.com/docs/webstore/service-accounts), [google-github-actions/auth](https://github.com/google-github-actions/auth), [AMO source code submission](https://extensionworkshop.com/documentation/publish/source-code-submission/).
+References: [Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api), [service accounts](https://developer.chrome.com/docs/webstore/service-accounts), [google-github-actions/auth](https://github.com/google-github-actions/auth), [AMO add-ons API](https://mozilla.github.io/addons-server/topics/api/addons.html), [AMO API authentication](https://mozilla.github.io/addons-server/topics/api/auth.html), [AMO source code submission](https://extensionworkshop.com/documentation/publish/source-code-submission/).
