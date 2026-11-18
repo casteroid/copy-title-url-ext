@@ -1,6 +1,7 @@
-name: Publish to Chrome Web Store
+name: Publish
 
-# Called by the Release workflow after it creates a release. Run it by hand to retry a release tag.
+# Called by the Release workflow after it creates a release: uploads it to the Chrome Web Store and Firefox Add-ons.
+# Run it by hand to retry a release tag.
 on:
   workflow_call:
     inputs:
@@ -10,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to upload and submit, e.g. v0.2.0"
+        description: "Release tag to upload to the stores, e.g. v0.2.0"
         type: string
         required: true
 
@@ -19,13 +20,13 @@ permissions:
   id-token: write
 
 jobs:
-  not-configured:
+  chrome-not-configured:
     if: vars.CWS_EXTENSION_ID == ''
     runs-on: ubuntu-latest
     steps:
       - run: echo "::notice::CWS_EXTENSION_ID is not set, so ${{ inputs.tag }} was not sent to the Chrome Web Store. See docs/releasing.md."
 
-  publish:
+  chrome:
     if: vars.CWS_EXTENSION_ID != ''
     runs-on: ubuntu-latest
     environment: chrome-web-store
@@ -63,3 +64,48 @@ jobs:
           CWS_PUBLISH_TYPE: ${{ vars.CWS_PUBLISH_TYPE }}
           TAG: ${{ inputs.tag }}
         run: CWS_EXPECTED_VERSION="${TAG#v}" node scripts/release/cws.ts release/*.chrome.zip
+
+  firefox:
+    runs-on: ubuntu-latest
+    environment: firefox-add-ons
+    env:
+      AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+      AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+      AMO_ADDON_ID: ${{ vars.AMO_ADDON_ID }}
+    steps:
+      # Secrets are not available in a job-level `if`, so this step gates the rest.
+      - name: Check configuration
+        id: config
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [ -z "$AMO_JWT_ISSUER" ] || [ -z "$AMO_JWT_SECRET" ] || [ -z "$AMO_ADDON_ID" ]; then
+            echo "::notice::AMO_JWT_ISSUER, AMO_JWT_SECRET or AMO_ADDON_ID is not set, so $TAG was not sent to Firefox Add-ons. See docs/releasing.md."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.config.outputs.configured == 'true'
+        with:
+          ref: ${{ inputs.tag }}
+
+      - uses: actions/setup-node@v7
+        if: steps.config.outputs.configured == 'true'
+        with:
+          node-version: 22
+
+      - name: Download release package and archive the source
+        if: steps.config.outputs.configured == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "*.firefox.xpi" --dir release
+          git archive --format=zip -o release/source.zip HEAD
+
+      - name: Upload to Firefox Add-ons
+        if: steps.config.outputs.configured == 'true'
+        env:
+          TAG: ${{ inputs.tag }}
+        run: AMO_EXPECTED_VERSION="${TAG#v}" node scripts/release/amo.ts release/*.firefox.xpi release/source.zip

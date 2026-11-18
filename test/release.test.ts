@@ -9,6 +9,7 @@ import {
   parseCommit,
   releaseNotes,
 } from "../scripts/release/conventional.ts";
+import { signJwt } from "../scripts/release/jwt.ts";
 
 const commit = (message: string, sha = "abcdef1234567890") => ({ sha, message });
 const parsed = (...messages: string[]) =>
@@ -90,6 +91,16 @@ describe("releaseNotes", () => {
 
   it("says so when nothing user-visible changed", () => {
     expect(releaseNotes(parsed("chore: deps"))).toBe("Maintenance release.\n");
+  });
+});
+
+describe("signJwt", () => {
+  it("signs with HS256 and base64url, no padding", () => {
+    expect(signJwt({ iss: "user:1:2", jti: "nonce", iat: 1700000000, exp: 1700000060 }, "s3cret")).toBe(
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+        "eyJpc3MiOiJ1c2VyOjE6MiIsImp0aSI6Im5vbmNlIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjE3MDAwMDAwNjB9." +
+        "a3Rw1LiS7zTXg0cpN_GUItvTy1G89VWn-NdeFoNTGmw",
+    );
   });
 });
 
